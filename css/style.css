@@ -1,0 +1,18 @@
+#guest label {
+    padding-left: 8px;
+}
+
+#guestForm, #guestList {
+    display: none;
+}
+
+#guestForm label, #guestForm input {
+    display: block;
+}
+
+#guestList .guestDelete {
+    background-position: -94px -125px;
+    float: none;
+    display: inline-block;
+    margin: 0px 0 0 0px;
+}

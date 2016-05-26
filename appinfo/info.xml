@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<info>
+    <id>user_share_guest</id>
+    <name>User Share Guest</name>
+    <description>Allows the user to share files to external user to the application. Gives access to the application with a guest account.</description>
+    <version>1.0</version>
+    <licence>AGPLv3</licence>
+    <author>Victor Bordage-Gorry / Globalis</author>
+    <require>7</require>
+</info>
