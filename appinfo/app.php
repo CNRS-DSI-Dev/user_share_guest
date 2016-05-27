@@ -11,6 +11,7 @@
 namespace OCA\User_Share_Guest;
 
 use \OCA\User_Share_Guest\App\User_Share_Guest;
+
 $app = new User_Share_Guest();
 $c = $app->getContainer();
 

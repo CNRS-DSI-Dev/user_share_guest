@@ -4,13 +4,7 @@ $(document).ready(function() {
     OC.Share.showDropDown = function(itemType, itemSource, appendTo, link, possiblePermissions, filename) {
         oldShowDropdown(itemType, itemSource, appendTo, link, possiblePermissions, filename);
 
-        var data = [
-            {'id' : 1, 'mail' : 'test 1'},
-            {'id' : 2, 'mail' : 'test 2'},
-            {'id' : 3, 'mail' : 'test 3'}
-        ];
-
-        // insertAfter
+        var data = OC.Share.loadListGuests();
         var html = '<div id="guest" class="guestShare">';
         html += '<span class="icon-loading-small hidden"></span>';
         html += '<input type="checkbox" name="guestCheckbox" id="guestCheckbox" value="1" />';
@@ -23,14 +17,57 @@ $(document).ready(function() {
         html += '<ul id="guestList">';
 
         for (var i = 0; i < data.length; i++) {
-            var invit = data[i];
-            html += '<li>' + invit.mail + '<span class="guestDelete ui-icon" data-guest-id ="' + invit.id + '"> x </span></li>';
+            var guest = data[i];
+            var class_active = 'class="not-active"';
+            if (guest.is_active == '1' ) {
+                class_active = '';
+            }
+            html += '<li ' + class_active + '>' + guest.uid + '<span class="guestDelete ui-icon" data-guest-id ="' + guest.uid + '"> x </span></li>';
         }
 
         html += '</ul>';
         html += '</div>';
         $('#dropdown').append(html);
+
     }
+
+    OC.Share.loadListGuests = function() {
+        var list;
+        $.ajax({
+            type: 'GET',
+            url: OC.generateUrl('apps/user_share_guest/list'),
+            dataType: 'json',
+            async: false,
+            success: function(resp) {
+                if (resp.status == 'error') {
+                    alert(resp.data.msg)
+                    return false;
+                }
+                list = resp.data.list;
+            }
+        });
+        return list;
+    }
+
+    OC.Share.createGuest = function(uid) {
+        $.ajax({
+            type: 'POST',
+            url: OC.generateUrl('apps/user_share_guest/create'),
+            dataType: 'json',
+            data: {uid: uid},
+            async: false,
+            success: function(resp) {
+                if (resp.status == 'error') {
+                    alert(resp.data.msg)
+                    return false;
+                }
+                var html = '<li class="not-active">' + resp.data.uid + '<span class="guestDelete ui-icon" data-guest-id ="' + resp.data.uid + '"> x </span></li>';
+                $('#guestList').append(html);
+                $('#guestInput').val('');
+            }
+        });
+    }
+
 
     OC.Share.hideGuest = function() {
         $('#guestForm').hide('blind');
@@ -43,13 +80,6 @@ $(document).ready(function() {
     }
 
     $(document).on('change', '#dropdown #guestCheckbox', function() {
-        var $dropDown = $('#dropdown');
-        var itemType = $dropDown.data('item-type');
-        var itemSource = $dropDown.data('item-source');
-        var itemSourceName = $dropDown.data('item-source-name');
-        var $loading = $dropDown.find('#link .icon-loading-small');
-        var $button = $(this);
-
         if (this.checked) {
             OC.Share.showGuest();
         } else {
@@ -60,8 +90,12 @@ $(document).ready(function() {
     $(document).on('click', '#dropdown #guestSubmit', function(event) {
         event.preventDefault();
         var data = $('#guestInput').val();
-        var html = '<li>' + data + '<span class="guestDelete ui-icon" data-guest-id ="' + 9 + '"> x </span></li>';
-        $("#guestList").append(html);
+        if (data == '') {
+            return false;
+        }
+
+        OC.Share.createGuest(data);
+
     });
 
     $(document).on('click', '#dropdown #guestList .guestDelete', function() {

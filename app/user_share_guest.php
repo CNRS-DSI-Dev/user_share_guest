@@ -11,35 +11,49 @@
 namespace OCA\User_Share_Guest\App;
 
 use \OCP\AppFramework\App;
+use \OCA\User_Share_Guest\Controller\GuestController;
+use \OCA\User_Share_Guest\Db\GuestMapper;
 
 class User_Share_Guest extends App {
 
     public function __construct(array $urlParams=array()) {
+
         parent::__construct('user_share_guest', $urlParams);
 
         $container = $this->getContainer();
 
         /**
+         * Controllers
+         */
+        $container->registerService('GuestController', function($c){
+            return new GuestController(
+                $c->query('AppName'),
+                $c->query('Request'),
+                $c->query('L10N'),
+                $c->query('GuestMapper'),
+                $c->query('UserId')
+            );
+        });
+
+        /**
+         * Database Layer
+         */
+        $container->registerService('GuestMapper', function($c) {
+            return new GuestMapper(
+                $c->query('ServerContainer')->getDb(),
+                $c->query('L10N')
+            );
+        });
+
+        /**
          * Core
          */
-
-        $container->registerService('Config', function($c) {
-            return $c->query('ServerContainer')->getConfig();
+        $container->registerService('UserId', function($c) {
+            return \OCP\User::getUser();
         });
 
         $container->registerService('L10N', function($c) {
             return $c->query('ServerContainer')->getL10N($c->query('AppName'));
-        });
-        $container->registerService('Logger', function($c) {
-            return $c->query('ServerContainer')->getLogger();
-        });
-
-        $container->registerService('UserManager', function($c) {
-            return $c->query('ServerContainer')->getUserManager();
-        });
-
-        $container->registerService('GroupManager', function($c) {
-            return $c->query('ServerContainer')->getGroupManager();
         });
 
     }

@@ -16,3 +16,8 @@
     display: inline-block;
     margin: 0px 0 0 0px;
 }
+
+
+#guestList .not-active {
+    color : #999999;
+}

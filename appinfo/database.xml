@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<database>
+ <name>*dbname*</name>
+ <overwrite>false</overwrite>
+ <charset>utf8</charset>
+ <table>
+  <name>*dbprefix*user_guest</name>
+  <declaration>
+    <field>
+      <name>uid</name>
+      <type>text</type>
+      <notnull>true</notnull>
+      <length>64</length>
+    </field>
+    <field>
+      <name>password</name>
+      <type>text</type>
+      <default></default>
+      <notnull>true</notnull>
+      <length>255</length>
+    </field>
+    <field>
+      <name>is_active</name>
+      <type>boolean</type>
+      <notnull>true</notnull>
+      <default>false</default>
+    </field>
+    <field>
+      <name>last_connection</name>
+      <type>timestamp</type>
+      <notnull>true</notnull>
+      <default>CURRENT_TIMESTAMP</default>
+    </field>
+  </declaration>
+</table>
+<table>
+  <name>*dbprefix*guest_sharer</name>
+  <declaration>
+    <field>
+      <name>uid_sharer</name>
+      <type>text</type>
+      <notnull>true</notnull>
+      <length>64</length>
+    </field>
+    <field>
+      <name>uid_guest</name>
+      <type>text</type>
+      <notnull>true</notnull>
+      <length>64</length>
+    </field>
+  </declaration>
+</table>
+</database>
