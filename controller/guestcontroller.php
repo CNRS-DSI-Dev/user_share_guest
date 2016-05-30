@@ -38,24 +38,26 @@ class GuestController extends APIController
      * @param string $uid   Guest's uid
      * @throws \Exception
      */
-    public function create($uid) {
-        try {
-            $guest = $this->guestMapper->createGuest($uid);
-        } catch (\Exception $e) {
-            $response = new JSONResponse();
-            return array(
-                'status' => 'error',
-                'data' => array(
-                    'msg' => $e->getMessage(),
-                ),
-            );
+    public function create($data) {
+        $list_uid = explode(',', str_replace(' ', '', trim($data)));
+        foreach($list_uid as $uid) {
+            try {
+                $guest = $this->guestMapper->createGuest($uid);
+            } catch (\Exception $e) {
+                $response = new JSONResponse();
+                return array(
+                    'status' => 'error',
+                    'data' => array(
+                        'msg' => $e->getMessage(),
+                    ),
+                );
+            }
+            $this->guestMapper->saveGuestSharer($uid, $this->userId);
         }
-        $this->guestMapper->saveGuestSharer($uid, $this->userId);
-
         return array(
             'status' => 'success',
             'data' => array(
-                'uid' => $uid,
+                'list' => $list_uid,
             ),
         );
     }
@@ -107,9 +109,12 @@ class GuestController extends APIController
      */
 
     public function delete($uid) {
-        echo $uid;exit();
+
         try {
             $request = $this->guestMapper->deleteSharerGuest($uid, $this->userId);
+            if($this->guestMapper->countSharers($uid) === 0) {
+                $this->guestMapper->deleteGuest($uid);
+            }
         }
         catch(\Exception $e) {
             $response = new JSONResponse();

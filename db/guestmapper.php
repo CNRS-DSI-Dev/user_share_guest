@@ -132,7 +132,8 @@ class GuestMapper extends Mapper {
     **********/
 
     public function countSharers($uid) {
-        $sql = 'SELECT count(uid_sharer) FROM ' . self::TABLE_GUEST_SHARER . 'WHERE uid_guest = ?';
-        return $this->execute($sql, array($uid));
+        $sql = 'SELECT count(uid_sharer) as count FROM ' . self::TABLE_GUEST_SHARER . ' WHERE uid_guest = ?';
+        $result = $this->execute($sql, array($uid))->fetch();
+        return intval($result['count']);
     }
 }

@@ -23,8 +23,8 @@ $application->registerRoutes($this, array(
         ),
         array(
             'name' => 'guest#delete',
-            'url' => '/delete/{uid}',
-            'verb' => 'GET',
+            'url' => '/delete',
+            'verb' => 'POST',
         ),
         array(
             'name' => 'guest#list_guests',
