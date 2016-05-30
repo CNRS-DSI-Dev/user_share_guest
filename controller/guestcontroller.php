@@ -21,13 +21,17 @@ class GuestController extends APIController
 {
 
     protected $guestMapper;
+    protected $userManager;
     protected $userId;
 
-    public function __construct($appName, IRequest $request, IL10N $l, GuestMapper $guestMapper, $userId) {
+    const PERMISSION_GUEST = 1;
+
+    public function __construct($appName, IRequest $request, IL10N $l, GuestMapper $guestMapper, $userId, $userManager) {
         parent::__construct($appName, $request, 'GET, POST');
         $this->l = $l;
         $this->guestMapper = $guestMapper;
         $this->userId = $userId;
+        $this->userManager = $userManager;
     }
 
     /**
@@ -38,11 +42,15 @@ class GuestController extends APIController
      * @param string $uid   Guest's uid
      * @throws \Exception
      */
-    public function create($data) {
+    public function create($data, $itemType, $itemSource, $itemSourceName) {
+        $data = strip_tags(stripslashes($data));
         $list_uid = explode(',', str_replace(' ', '', trim($data)));
         foreach($list_uid as $uid) {
             try {
                 $guest = $this->guestMapper->createGuest($uid);
+                if (!$this->userManager->userExists($uid)) {
+                    $this->userManager->createUser($uid, uniqid());
+                }
             } catch (\Exception $e) {
                 $response = new JSONResponse();
                 return array(
@@ -53,6 +61,25 @@ class GuestController extends APIController
                 );
             }
             $this->guestMapper->saveGuestSharer($uid, $this->userId);
+            try {
+                \OCP\Share::shareItem(
+                    $itemType,
+                    $itemSource,
+                    0,
+                    $uid,
+                    self::PERMISSION_GUEST,
+                    $itemSourceName,
+                    null
+                );
+            } catch (\Exception $e) {
+                $response = new JSONResponse();
+                return array(
+                    'status' => 'error',
+                    'data' => array(
+                        'msg' => $e->getMessage(),
+                    ),
+                );
+            }
         }
         return array(
             'status' => 'success',
@@ -108,10 +135,16 @@ class GuestController extends APIController
      * @param string $uid  Sharer's identifier
      */
 
-    public function delete($uid) {
+    public function delete($uid, $itemType, $itemSource) {
 
         try {
             $request = $this->guestMapper->deleteSharerGuest($uid, $this->userId);
+            \OCP\Share::unshare(
+                $itemType,
+                $itemSource,
+                -1,
+                $uid
+            );
             if($this->guestMapper->countSharers($uid) === 0) {
                 $this->guestMapper->deleteGuest($uid);
             }
@@ -132,6 +165,27 @@ class GuestController extends APIController
                 'msg' => $this->l->t('Share deleted'),
             ),
         );
+    }
+
+    /**
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     *
+     * @param string $uid  Sharer's identifier
+     */
+    public function test($data) {
+
+        \OCP\Share::shareItem(
+            'folder',
+            3,
+            0,
+            'coucou@coucou.com',
+            self::PERMISSION_GUEST,
+            'test',
+            null
+        );
+        echo "FIN";exit();
     }
 
 }

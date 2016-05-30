@@ -8,7 +8,7 @@
  * @license This file is licensed under the Affero General Public License version 3 or later. See the COPYING file.
  */
 
-namespace OCA\User_Deletion_Request\Service;
+namespace OCA\User_Share_Guest\Service;
 
 use \OCP\IL10N;
 use \OCP\IConfig;
@@ -22,24 +22,14 @@ Class MailService
     protected $l;
     protected $config;
 
-    public function __construct($appName, IL10N $l, IConfig $config, $userManager, $groupManager)
+    public function __construct($appName, IL10N $l, IConfig $config, )
     {
         $this->appName = $appName;
         $this->l = $l;
         $this->config = $config;
-        $this->userManager = $userManager;
-        $this->groupManager = $groupManager;
     }
 
-    /**
-     * Adds the user to the reject group and send an email to the administrator to inform them of the request for deletion
-     *
-     * @author Victor Bordage-Gorry <victor.bordage-gorry@globalis-ms.com>
-     * @copyright 2015 CNRS DSI / GLOBALIS media systems
-     *
-     * @param     string   $requesterUid    User's Uid
-     */
-    public function mailDeleteAccount($requesterUid)
+    public function sendMailGuest($uid)
     {
         $reason = trim(nl2br(strip_tags(stripslashes($_POST['deletion_reason']))));
         if (empty($reason) || $reason === '') {

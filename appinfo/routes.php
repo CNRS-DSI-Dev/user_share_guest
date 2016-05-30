@@ -31,5 +31,10 @@ $application->registerRoutes($this, array(
             'url' => '/list',
             'verb' => 'GET',
         ),
+        array(
+            'name' => 'guest#test',
+            'url' => '/test/{data}',
+            'verb' => 'GET',
+        ),
     ),
 ));

@@ -13,11 +13,10 @@
       <length>64</length>
     </field>
     <field>
-      <name>password</name>
-      <type>text</type>
-      <default></default>
+      <name>accepted</name>
+      <type>boolean</type>
+      <default>false</default>
       <notnull>true</notnull>
-      <length>255</length>
     </field>
     <field>
       <name>is_active</name>

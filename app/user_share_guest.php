@@ -13,6 +13,7 @@ namespace OCA\User_Share_Guest\App;
 use \OCP\AppFramework\App;
 use \OCA\User_Share_Guest\Controller\GuestController;
 use \OCA\User_Share_Guest\Db\GuestMapper;
+use \OCA\User_Share_Guest\Hooks\GuestHooks;
 
 class User_Share_Guest extends App {
 
@@ -31,7 +32,8 @@ class User_Share_Guest extends App {
                 $c->query('Request'),
                 $c->query('L10N'),
                 $c->query('GuestMapper'),
-                $c->query('UserId')
+                $c->query('UserId'),
+                $c->query('UserManager')
             );
         });
 
@@ -46,6 +48,17 @@ class User_Share_Guest extends App {
         });
 
         /**
+         * Hooks
+         */
+
+        $container->registerService('GuestHooks', function($c){
+            return new GuestHooks(
+                $c->query('GuestMapper')
+                );
+        });
+
+
+        /**
          * Core
          */
         $container->registerService('UserId', function($c) {
@@ -54,6 +67,10 @@ class User_Share_Guest extends App {
 
         $container->registerService('L10N', function($c) {
             return $c->query('ServerContainer')->getL10N($c->query('AppName'));
+        });
+
+        $container->registerService('UserManager', function($c) {
+            return $c->query('ServerContainer')->getUserManager();
         });
 
     }

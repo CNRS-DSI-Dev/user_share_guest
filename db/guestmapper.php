@@ -18,6 +18,8 @@ class GuestMapper extends Mapper {
 
     const TABLE_USER_GUEST = '*PREFIX*user_guest';
     const TABLE_GUEST_SHARER = '*PREFIX*guest_sharer';
+    const TABLE_SHARE = '*PREFIX*share';
+    const SHARE_GUEST_STATUT = \OC\Share\Constants::FORMAT_NONE;
 
     protected $l;
 
@@ -85,7 +87,7 @@ class GuestMapper extends Mapper {
 
         $guest = new Guest();
         $guest->setUid($uid);
-        $guest->setPassword('guest');
+        $guest->setAccepted(false);
         $guest->setIsActive(false);
 
         $this->insert($guest);
@@ -135,5 +137,10 @@ class GuestMapper extends Mapper {
         $sql = 'SELECT count(uid_sharer) as count FROM ' . self::TABLE_GUEST_SHARER . ' WHERE uid_guest = ?';
         $result = $this->execute($sql, array($uid))->fetch();
         return intval($result['count']);
+    }
+
+    public function updateGuestShareStatut($uid, $uid_sharer) {
+        $sql = 'UPDATE ' . self::TABLE_SHARE . ' SET share_type = ' . self::SHARE_GUEST_STATUT . ' WHERE share_with = ? AND uid_owner = ?';
+        $this->execute($sql, array($uid, $uid_sharer));
     }
 }

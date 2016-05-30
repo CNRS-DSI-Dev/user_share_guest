@@ -14,7 +14,7 @@ use \OCP\AppFramework\Db\Entity;
 
 class Guest extends Entity {
     protected $uid;
-    protected $password;
+    protected $accepted;
     protected $isActive;
     protected $lastConnection;
 

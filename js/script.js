@@ -4,6 +4,13 @@ $(document).ready(function() {
     OC.Share.showDropDown = function(itemType, itemSource, appendTo, link, possiblePermissions, filename) {
         oldShowDropdown(itemType, itemSource, appendTo, link, possiblePermissions, filename);
 
+        $('#shareWithList li').each(function() {
+            var that = $(this);
+            if(that.data('share-type') == '-1') {
+                that.remove();
+            }
+        });
+
         var data = OC.Share.loadListGuests();
         var html = '<div id="guest" class="guestShare">';
         html += '<span class="icon-loading-small hidden"></span>';
@@ -52,12 +59,12 @@ $(document).ready(function() {
         return list;
     }
 
-    OC.Share.createGuest = function(data) {
+    OC.Share.createShareGuest = function(data, itemType, itemSource, itemSourceName) {
         $.ajax({
             type: 'POST',
             url: OC.generateUrl('apps/user_share_guest/create'),
             dataType: 'json',
-            data: {data: data},
+            data: {data: data, itemType: itemType, itemSource:itemSource, itemSourceName, itemSourceName},
             async: false,
             success: function(resp) {
                 if (resp.status == 'error') {
@@ -70,19 +77,18 @@ $(document).ready(function() {
                     var guest = list[i];
                     html += '<li class="not-active">' + guest + '<span class="guestDelete ui-icon" data-guest-uid ="' + guest + '"> x </span></li>';
                 }
-
                 $('#guestList').append(html);
                 $('#guestInput').val('');
             }
         });
     }
 
-    OC.Share.deleteGuest = function(uid, elem) {
+    OC.Share.deleteGuest = function(uid, itemType, itemSource, elem) {
         $.ajax({
             type: 'POST',
             url: OC.generateUrl('apps/user_share_guest/delete'),
             dataType: 'json',
-            data: {uid: uid},
+            data: {uid: uid, itemType: itemType, itemSource: itemSource},
             async: false,
             success: function(resp) {
                 if (resp.status == 'error') {
@@ -93,7 +99,6 @@ $(document).ready(function() {
             }
         });
     }
-
 
     OC.Share.hideGuest = function() {
         $('#guestForm').hide('blind');
@@ -115,17 +120,22 @@ $(document).ready(function() {
 
     $(document).on('click', '#dropdown #guestSubmit', function(event) {
         event.preventDefault();
+        var $dropDown = $('#dropdown');
+        var itemType = $dropDown.data('item-type');
+        var itemSource = $dropDown.data('item-source');
+        var itemSourceName = $dropDown.data('item-source-name');
         var data = $('#guestInput').val();
         if (data == '') {
             return false;
         }
-
-        OC.Share.createGuest(data);
-
+        OC.Share.createShareGuest(data, itemType, itemSource, itemSourceName);
     });
 
     $(document).on('click', '#dropdown #guestList .guestDelete', function() {
+        var $dropDown = $('#dropdown');
         var $elem = $(this);
-        OC.Share.deleteGuest($elem.data('guest-uid'), $elem);
+        var itemType = $dropDown.data('item-type');
+        var itemSource = $dropDown.data('item-source');
+        OC.Share.deleteGuest($elem.data('guest-uid'), itemType, itemSource, $elem);
     });
 });

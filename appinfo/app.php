@@ -15,9 +15,12 @@ use \OCA\User_Share_Guest\App\User_Share_Guest;
 $app = new User_Share_Guest();
 $c = $app->getContainer();
 
+
 /**
  * register personnal settings section
  */
+
+$app->getContainer()->query('GuestHooks')->register();
 
 \OCP\Util::addStyle('user_share_guest','style');
 \OCP\Util::addScript('user_share_guest','script');
