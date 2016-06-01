@@ -30,6 +30,12 @@
       <notnull>true</notnull>
       <default>CURRENT_TIMESTAMP</default>
     </field>
+    <field>
+      <name>token</name>
+      <type>text</type>
+      <notnull>true</notnull>
+      <length>255</length>
+    </field>
   </declaration>
 </table>
 <table>

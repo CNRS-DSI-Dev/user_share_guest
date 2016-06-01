@@ -12,8 +12,10 @@ namespace OCA\User_Share_Guest\App;
 
 use \OCP\AppFramework\App;
 use \OCA\User_Share_Guest\Controller\GuestController;
+use \OCA\User_Share_Guest\Controller\PageController;
 use \OCA\User_Share_Guest\Db\GuestMapper;
 use \OCA\User_Share_Guest\Hooks\GuestHooks;
+use \OCA\User_Share_Guest\Service\MailService;
 
 class User_Share_Guest extends App {
 
@@ -28,6 +30,18 @@ class User_Share_Guest extends App {
          */
         $container->registerService('GuestController', function($c){
             return new GuestController(
+                $c->query('AppName'),
+                $c->query('Request'),
+                $c->query('L10N'),
+                $c->query('GuestMapper'),
+                $c->query('UserId'),
+                $c->query('UserManager'),
+                $c->query('MailService')
+            );
+        });
+
+        $container->registerService('PageController', function($c){
+            return new PageController(
                 $c->query('AppName'),
                 $c->query('Request'),
                 $c->query('L10N'),
@@ -53,10 +67,24 @@ class User_Share_Guest extends App {
 
         $container->registerService('GuestHooks', function($c){
             return new GuestHooks(
-                $c->query('GuestMapper')
-                );
+                $c->query('GuestMapper'),
+                $c->query('UserManager')
+            );
         });
 
+        /**
+         * Services
+         */
+        $container->registerService('MailService', function($c){
+            return new MailService(
+                $c->query('AppName'),
+                $c->query('UserId'),
+                $c->query('L10N'),
+                $c->query('Config'),
+                $c->query('UserManager'),
+                $c->query('ServerContainer')->getURLGenerator()
+            );
+        });
 
         /**
          * Core
@@ -71,6 +99,10 @@ class User_Share_Guest extends App {
 
         $container->registerService('UserManager', function($c) {
             return $c->query('ServerContainer')->getUserManager();
+        });
+
+        $container->registerService('Config', function($c) {
+            return $c->query('ServerContainer')->getConfig();
         });
 
     }

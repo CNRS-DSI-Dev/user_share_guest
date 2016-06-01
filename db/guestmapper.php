@@ -20,12 +20,13 @@ class GuestMapper extends Mapper {
     const TABLE_GUEST_SHARER = '*PREFIX*guest_sharer';
     const TABLE_SHARE = '*PREFIX*share';
     const SHARE_GUEST_STATUT = \OC\Share\Constants::FORMAT_NONE;
+    private $accepeted_keys;
 
     protected $l;
 
     public function __construct(IDb $db,  IL10N $l) {
         $this->l = $l;
-
+        $this->accepeted_keys = array('accepted', 'is_active', 'last_connection','token');
         parent::__construct($db, 'user_guest');
     }
 
@@ -73,7 +74,7 @@ class GuestMapper extends Mapper {
      * @param  string   $uid
      * @return Guest
      */
-    public function createGuest($uid) {
+    public function createGuest($uid, $token) {
 
         if (!filter_var($uid, FILTER_VALIDATE_EMAIL)) {
             throw new \Exception($this->l->t('Error : invalid mail.'));
@@ -89,12 +90,19 @@ class GuestMapper extends Mapper {
         $guest->setUid($uid);
         $guest->setAccepted(false);
         $guest->setIsActive(false);
+        $guest->setToken($token);
 
         $this->insert($guest);
-        return $guest;
 
+        return $guest;
     }
 
+    /**
+     * Save an association sharer / guest
+     *
+     * @param  string $uid
+     * @param  string $uid_sharer
+     */
     public function saveGuestSharer($uid, $uid_sharer) {
         $sql = 'INSERT INTO ' . self::TABLE_GUEST_SHARER . ' VALUES (?, ?)';
         $this->execute($sql, array($uid_sharer, $uid));
@@ -103,6 +111,37 @@ class GuestMapper extends Mapper {
     /**********
       UPDATE
     **********/
+
+    /**
+     * Update guest's informations
+     *
+     * @param  string $uid
+     * @param  array  $data
+     */
+    public function updateGuest($uid, $data = array()) {
+
+        if (empty($data)) {
+            return false;
+        }
+
+        $sql = 'UPDATE ' . self::TABLE_USER_GUEST . ' SET';
+        $data_update = array();
+        $update = '';
+        foreach ($data as $k => $v) {
+            if (in_array($k, $this->accepeted_keys)) {
+                if ($v != 'NOW()') {
+                    $update .= ' ' . $k . ' = ?,';
+                    $data_update[] = $v;
+                } else {
+                    $update .= ' ' . $k . ' = NOW(),';
+                }
+            }
+        }
+
+        $sql .= substr($update, 0, -1) . ' WHERE uid = ?';
+        $data_update[] = $uid;
+        $this->execute($sql, $data_update);
+    }
 
     /**********
       DELETE
@@ -133,14 +172,50 @@ class GuestMapper extends Mapper {
       OTHER
     **********/
 
+    /**
+     * Return the number of sharers for a guest
+     *
+     * @param  string $uid
+     * @return int
+     */
     public function countSharers($uid) {
         $sql = 'SELECT count(uid_sharer) as count FROM ' . self::TABLE_GUEST_SHARER . ' WHERE uid_guest = ?';
         $result = $this->execute($sql, array($uid))->fetch();
         return intval($result['count']);
     }
 
+    /**
+     * Update the statut of the guest's share
+     *
+     * @param  string $uid
+     * @param  string $uid_sharer
+     */
+
     public function updateGuestShareStatut($uid, $uid_sharer) {
         $sql = 'UPDATE ' . self::TABLE_SHARE . ' SET share_type = ' . self::SHARE_GUEST_STATUT . ' WHERE share_with = ? AND uid_owner = ?';
         $this->execute($sql, array($uid, $uid_sharer));
+    }
+
+    /**
+     * Check if the user accepted the invitation
+     *
+     * @param  string  $uid
+     * @return Guest
+     */
+    public function hasGuestAccepted($uid) {
+        $sql = 'SELECT * FROM ' . self::TABLE_USER_GUEST . ' WHERE uid = ? AND accepted = 1';
+        return $this->findEntities($sql, array($uid));
+    }
+
+    /**
+     * Check the token's validity
+     *
+     * @param  string $uid   [description]
+     * @param  string $token [description]
+     * @return Guest
+     */
+    public function verifyGuestToken($uid, $token) {
+        $sql = 'SELECT * FROM ' . self::TABLE_USER_GUEST . ' WHERE uid = ? AND token = ?';
+        return $this->findEntities($sql, array($uid, $token));
     }
 }

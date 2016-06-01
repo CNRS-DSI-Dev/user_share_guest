@@ -1,7 +1,7 @@
 <?php
 
 /**
- * ownCloud - User Share Guest Request
+ * ownCloud - User Share Guest
  *
  * @author Victor Bordage-Gorry <victor.bordage-gorry@globalis-ms.com>
  * @copyright 2016 CNRS DSI / GLOBALIS media systems

@@ -17,6 +17,7 @@ class Guest extends Entity {
     protected $accepted;
     protected $isActive;
     protected $lastConnection;
+    protected $token;
 
     public function __construct() {
 

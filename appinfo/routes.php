@@ -36,5 +36,15 @@ $application->registerRoutes($this, array(
             'url' => '/test/{data}',
             'verb' => 'GET',
         ),
+        array(
+            'name' => 'page#confirm',
+            'url' => '/confirm/{uid}/{token}',
+            'verb' => 'GET'
+        ),
+        array(
+            'name' => 'page#accept',
+            'url' => '/confirm/{uid}/{token}',
+            'verb' => 'POST'
+        ),
     ),
 ));

@@ -17,21 +17,22 @@ use \OCP\IL10N;
 use \OCA\User_Share_Guest\Db\GuestMapper;
 use \OCA\User_Share_Guest\Db\Guest;
 
-class GuestController extends APIController
-{
+class GuestController extends APIController {
 
     protected $guestMapper;
     protected $userManager;
     protected $userId;
+    protected $mailService;
 
     const PERMISSION_GUEST = 1;
 
-    public function __construct($appName, IRequest $request, IL10N $l, GuestMapper $guestMapper, $userId, $userManager) {
+    public function __construct($appName, IRequest $request, IL10N $l, GuestMapper $guestMapper, $userId, $userManager, $mailService) {
         parent::__construct($appName, $request, 'GET, POST');
         $this->l = $l;
         $this->guestMapper = $guestMapper;
         $this->userId = $userId;
         $this->userManager = $userManager;
+        $this->mailService = $mailService;
     }
 
     /**
@@ -46,10 +47,12 @@ class GuestController extends APIController
         $data = strip_tags(stripslashes($data));
         $list_uid = explode(',', str_replace(' ', '', trim($data)));
         foreach($list_uid as $uid) {
+            $token = $this->generateToken($uid);
             try {
-                $guest = $this->guestMapper->createGuest($uid);
+
                 if (!$this->userManager->userExists($uid)) {
                     $this->userManager->createUser($uid, uniqid());
+                    $guest = $this->guestMapper->createGuest($uid, $token);
                 }
             } catch (\Exception $e) {
                 $response = new JSONResponse();
@@ -60,7 +63,10 @@ class GuestController extends APIController
                     ),
                 );
             }
-            $this->guestMapper->saveGuestSharer($uid, $this->userId);
+            if ($this->guestMapper->getGuests($uid)) {
+                $this->guestMapper->saveGuestSharer($uid, $this->userId);
+                $this->mailService->sendMailGuest($uid, $token);
+            }
             try {
                 \OCP\Share::shareItem(
                     $itemType,
@@ -146,6 +152,7 @@ class GuestController extends APIController
                 $uid
             );
             if($this->guestMapper->countSharers($uid) === 0) {
+                \OC_User::deleteUser($uid);
                 $this->guestMapper->deleteGuest($uid);
             }
         }
@@ -176,18 +183,13 @@ class GuestController extends APIController
      */
     public function test($data) {
 
-        \OCP\Share::shareItem(
-            'folder',
-            3,
-            0,
-            'coucou@coucou.com',
-            self::PERMISSION_GUEST,
-            'test',
-            null
-        );
+        $this->create("victor.bordage-gorry@globalis-ms.com", null, null, null);
         echo "FIN";exit();
     }
 
+    private function generateToken($uid) {
+        return base64_encode(uniqid() . $uid);
+    }
 }
 
 
