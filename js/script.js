@@ -1,5 +1,8 @@
 $(document).ready(function() {
     var oldShowDropdown = OC.Share.showDropDown;
+    var itemType = '';
+    var itemSource = '';
+    var itemSourceName = '';
 
     OC.Share.showDropDown = function(itemType, itemSource, appendTo, link, possiblePermissions, filename) {
         oldShowDropdown(itemType, itemSource, appendTo, link, possiblePermissions, filename);
@@ -11,7 +14,7 @@ $(document).ready(function() {
             }
         });
 
-        var data = OC.Share.loadListGuests();
+        var data = OC.Share.loadListGuests(itemType, itemSource);
         var html = '<div id="guest" class="guestShare">';
         html += '<span class="icon-loading-small hidden"></span>';
         html += '<input type="checkbox" name="guestCheckbox" id="guestCheckbox" value="1" />';
@@ -30,6 +33,7 @@ $(document).ready(function() {
                 class_active = '';
             }
             html += '<li ' + class_active + '>' + guest.uid + '<span class="guestDelete ui-icon" data-guest-uid ="' + guest.uid + '"> x </span></li>';
+            $('#shareWithList li[title="' + guest.uid + '"]').remove();
         }
 
         html += '</ul>';
@@ -41,16 +45,17 @@ $(document).ready(function() {
 
     }
 
-    OC.Share.loadListGuests = function() {
+    OC.Share.loadListGuests = function(itemType, itemSource) {
         var list;
         $.ajax({
             type: 'GET',
             url: OC.generateUrl('apps/user_share_guest/list'),
+            data:{itemType: itemType, itemSource: itemSource},
             dataType: 'json',
             async: false,
             success: function(resp) {
                 if (resp.status == 'error') {
-                    alert(resp.data.msg)
+                    generatePopinGuest(resp.data.msg, false);
                     return false;
                 }
                 list = resp.data.list;
@@ -64,19 +69,21 @@ $(document).ready(function() {
             type: 'POST',
             url: OC.generateUrl('apps/user_share_guest/create'),
             dataType: 'json',
-            data: {data: data, itemType: itemType, itemSource:itemSource, itemSourceName, itemSourceName},
+            data: {uid: data, itemType: itemType, itemSource:itemSource, itemSourceName, itemSourceName},
             async: false,
             success: function(resp) {
                 if (resp.status == 'error') {
-                    alert(resp.data.msg)
+                    generatePopinGuest(resp.data.msg, false);
                     return false;
                 }
-                var list = resp.data.list;
+                var guest = resp.data.guest;
+                console.log(guest);
                 var html = '';
-                for (var i = 0; i < list.length; i++) {
-                    var guest = list[i];
-                    html += '<li class="not-active">' + guest + '<span class="guestDelete ui-icon" data-guest-uid ="' + guest + '"> x </span></li>';
+                var class_active = 'class="not-active"';
+                if (guest.is_active == '1' ) {
+                    class_active = '';
                 }
+                html += '<li ' + class_active + '>' + guest.uid + '<span class="guestDelete ui-icon" data-guest-uid ="' + guest.uid + '"> x </span></li>';
                 $('#guestList').append(html);
                 $('#guestInput').val('');
             }
@@ -92,7 +99,7 @@ $(document).ready(function() {
             async: false,
             success: function(resp) {
                 if (resp.status == 'error') {
-                    alert(resp.data.msg)
+                    generatePopinGuest(resp.data.msg, false);
                     return false;
                 }
                 elem.parent('li').remove();
@@ -121,21 +128,66 @@ $(document).ready(function() {
     $(document).on('click', '#dropdown #guestSubmit', function(event) {
         event.preventDefault();
         var $dropDown = $('#dropdown');
-        var itemType = $dropDown.data('item-type');
-        var itemSource = $dropDown.data('item-source');
-        var itemSourceName = $dropDown.data('item-source-name');
+        itemType = $dropDown.data('item-type');
+        itemSource = $dropDown.data('item-source');
+        itemSourceName = $dropDown.data('item-source-name');
         var data = $('#guestInput').val();
         if (data == '') {
             return false;
         }
-        OC.Share.createShareGuest(data, itemType, itemSource, itemSourceName);
+        $.ajax({
+            type: 'GET',
+            url: OC.generateUrl('apps/user_share_guest/is_guest_creation'),
+            dataType: 'json',
+            data: {data: data},
+            async: false,
+            success: function(resp) {
+                if (resp.data.creation) {
+                    var txt = t('user_share_guest', 'Attention, you well took knowledge of the risks regarding the sharing of file to a guest account.');
+                    generatePopinGuest(txt, true)
+                } else {
+                    launchCreateGuest();
+                }
+            }
+        });
+        //
     });
+
+    function launchCreateGuest() {
+        var data = $('#guestInput').val();
+        OC.Share.createShareGuest(data, itemType, itemSource, itemSourceName);
+    }
 
     $(document).on('click', '#dropdown #guestList .guestDelete', function() {
         var $dropDown = $('#dropdown');
-        var $elem = $(this);
-        var itemType = $dropDown.data('item-type');
-        var itemSource = $dropDown.data('item-source');
+        $elem = $(this);
+        itemType = $dropDown.data('item-type');
+        itemSource = $dropDown.data('item-source');
         OC.Share.deleteGuest($elem.data('guest-uid'), itemType, itemSource, $elem);
     });
+
+
+
+    function generatePopinGuest(txt, addbutton) {
+        var html = '<div id="calque-shareguest-popin"><div id="shareguest-popin">';
+        html += '<span class="close">X</span>';
+        html += '<p>' + txt + '</p>';
+        if (addbutton) {
+            html += '<button class="validate">Valider</button> <button class="cancel">Annuler</button>'
+        }
+        html += '</div></div>';
+        $('body').append(html);
+
+        $('#calque-shareguest-popin, #calque-shareguest-popin .close, #calque-shareguest-popin .cancel').click(function(){
+            event.stopPropagation();
+            $('#calque-shareguest-popin').remove();
+        });
+
+        $('#calque-shareguest-popin .validate').click(function(){
+            $('#calque-shareguest-popin').remove();
+            event.stopPropagation();
+            launchCreateGuest();
+        })
+    }
+
 });

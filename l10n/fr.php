@@ -16,5 +16,11 @@ $TRANSLATIONS  = array(
     'Set your password to confirm the creation of your account', 'Renseignez votre mot de passe afin de confirmer la création de votre compte',
     'Validate', 'Valider',
     'Passwords are different, please check your entry' => 'Les mots de passe sont différents, veuillez vérifier votre saisie',
-    'Your password is not enough secure' => 'Votre mot de passe n\'est pas assez sécurisé'
+    'Your password is not enough secure' => 'Votre mot de passe n\'est pas assez sécurisé',
+    'Log out' => 'Se déconnecter',
+    'Help' => 'Aide',
+    'Name' => 'Nom',
+    'Share time' => 'Date de partage',
+    'No files have been shared with you yet.' => 'Aucun fichier n\'a été partagé avec vous.',
+    'Attention, you well took knowledge of the risks regarding the sharing of file to a guest account.' => 'Attention, vous avez bien pris connaissances des risques concernant le partage de fichier à un compte invité'
 );

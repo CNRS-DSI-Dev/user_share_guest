@@ -14,10 +14,12 @@ class GuestHooks {
 
     private $guestMapper;
     private $userManager;
+    private $session;
 
-    public function __construct($guestMapper, $userManager) {
+    public function __construct($guestMapper, $userManager, $session) {
         $this->guestMapper = $guestMapper;
         $this->userManager = $userManager;
+        $this->session = $session;
     }
 
     /**
@@ -45,10 +47,14 @@ class GuestHooks {
     }
 
     public function postLogin ($user) {
-        if (!$this->guestMapper->hasGuestAccepted() && $this->guestMapper->getGuests($user->getUid())) {
+        /*echo "<pre>";
+        var_dump(\OCP\User::getUserSession());
+        //\OCP\User::logout();
+        exit();*/
+        /*if (!$this->guestMapper->hasGuestAccepted() && $this->guestMapper->getGuests($user->getUid())) {
             \OCP\User::logout();
             \OC_Util::redirectToDefaultPage();
             exit();
-       }
+       }*/
     }
 }

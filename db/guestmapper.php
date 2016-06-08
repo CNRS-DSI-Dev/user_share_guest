@@ -19,7 +19,7 @@ class GuestMapper extends Mapper {
     const TABLE_USER_GUEST = '*PREFIX*user_guest';
     const TABLE_GUEST_SHARER = '*PREFIX*guest_sharer';
     const TABLE_SHARE = '*PREFIX*share';
-    const SHARE_GUEST_STATUT = \OC\Share\Constants::FORMAT_NONE;
+    const SHARE_GUEST_STATUT = 5;
     private $accepeted_keys;
 
     protected $l;
@@ -59,7 +59,7 @@ class GuestMapper extends Mapper {
                 $data[] = $uid;
             }
         }
-        return $this->findEntities($sql, $data, $limit, $offset);
+        return $this->findEntities($sql, $data, 1, $offset);
     }
 
 
@@ -102,10 +102,12 @@ class GuestMapper extends Mapper {
      *
      * @param  string $uid
      * @param  string $uid_sharer
+     * @param  string $itemType
+     * @param  string $itemSource
      */
-    public function saveGuestSharer($uid, $uid_sharer) {
-        $sql = 'INSERT INTO ' . self::TABLE_GUEST_SHARER . ' VALUES (?, ?)';
-        $this->execute($sql, array($uid_sharer, $uid));
+    public function saveGuestSharer($uid, $uid_sharer, $itemType, $itemSource) {
+        $sql = 'INSERT INTO ' . self::TABLE_GUEST_SHARER . ' VALUES (?, ?, ?, ?)';
+        $this->execute($sql, array($uid_sharer, $uid, $itemType, $itemSource));
     }
 
     /**********
@@ -160,12 +162,14 @@ class GuestMapper extends Mapper {
     /**
      * Delete an association sharer / guest
      *
-     * @param  string   $uid
-     * @param  string   $uid_sharer
+     * @param  string $uid
+     * @param  string $uid_sharer
+     * @param  string $itemType
+     * @param  string $itemSource
      */
-    public function deleteSharerGuest($uid, $uid_sharer) {
-        $sql = 'DELETE FROM ' . self::TABLE_GUEST_SHARER . ' WHERE uid_guest = ? AND uid_sharer = ?';
-        $this->execute($sql, array($uid, $uid_sharer));
+    public function deleteSharerGuest($uid, $uid_sharer, $itemType, $itemSource) {
+        $sql = 'DELETE FROM ' . self::TABLE_GUEST_SHARER . ' WHERE uid_guest = ? AND uid_sharer = ? AND item_type = ? AND item_source = ?';
+        $this->execute($sql, array($uid, $uid_sharer, $itemType, $itemSource));
     }
 
     /**********
@@ -204,7 +208,8 @@ class GuestMapper extends Mapper {
      */
     public function hasGuestAccepted($uid) {
         $sql = 'SELECT * FROM ' . self::TABLE_USER_GUEST . ' WHERE uid = ? AND accepted = 1';
-        return $this->findEntities($sql, array($uid));
+        $result = $this->findEntities($sql, array($uid));
+        return (!empty($result));
     }
 
     /**

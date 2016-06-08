@@ -20,7 +20,8 @@ $c = $app->getContainer();
  * register personnal settings section
  */
 
-$app->getContainer()->query('GuestHooks')->register();
+$c->query('GuestHooks')->register();
+
 
 \OCP\Util::addStyle('user_share_guest','style');
 \OCP\Util::addScript('user_share_guest','script');

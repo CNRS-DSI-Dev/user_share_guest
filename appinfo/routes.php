@@ -16,6 +16,7 @@ $application = new User_Share_Guest();
 
 $application->registerRoutes($this, array(
     'routes' => array(
+        // GUEST CONTROLLER
         array(
             'name' => 'guest#create',
             'url' => '/create',
@@ -32,10 +33,21 @@ $application->registerRoutes($this, array(
             'verb' => 'GET',
         ),
         array(
+            'name' => 'guest#share_list',
+            'url' => '/share_list_user',
+            'verb' => 'GET',
+        ),
+        array(
+            'name' => 'guest#is_guest_creation',
+            'url' => '/is_guest_creation',
+            'verb' => 'GET',
+        ),
+        array(
             'name' => 'guest#test',
             'url' => '/test/{data}',
             'verb' => 'GET',
         ),
+        // PAGE CONTROLLER
         array(
             'name' => 'page#confirm',
             'url' => '/confirm/{uid}/{token}',
@@ -45,6 +57,11 @@ $application->registerRoutes($this, array(
             'name' => 'page#accept',
             'url' => '/confirm/{uid}/{token}',
             'verb' => 'POST'
+        ),
+        array(
+            'name' => 'page#share_list',
+            'url' => '/share_list',
+            'verb' => 'GET'
         ),
     ),
 ));

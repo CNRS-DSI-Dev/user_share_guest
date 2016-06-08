@@ -16,6 +16,7 @@ use \OCA\User_Share_Guest\Controller\PageController;
 use \OCA\User_Share_Guest\Db\GuestMapper;
 use \OCA\User_Share_Guest\Hooks\GuestHooks;
 use \OCA\User_Share_Guest\Service\MailService;
+//use \OCA\User_Share_Guest\Middleware\GuestMiddleware;
 
 class User_Share_Guest extends App {
 
@@ -47,7 +48,8 @@ class User_Share_Guest extends App {
                 $c->query('L10N'),
                 $c->query('GuestMapper'),
                 $c->query('UserId'),
-                $c->query('UserManager')
+                $c->query('UserManager'),
+                $c->query('ServerContainer')->getURLGenerator()
             );
         });
 
@@ -68,7 +70,8 @@ class User_Share_Guest extends App {
         $container->registerService('GuestHooks', function($c){
             return new GuestHooks(
                 $c->query('GuestMapper'),
-                $c->query('UserManager')
+                $c->query('UserManager'),
+                $c->query('Session')
             );
         });
 
@@ -85,6 +88,18 @@ class User_Share_Guest extends App {
                 $c->query('ServerContainer')->getURLGenerator()
             );
         });
+
+        /**
+         * Middleware
+         */
+
+        /*
+        $container->registerService('GuestMiddleware', function($c){
+            return new GuestMiddleware();
+        });
+
+        $container->registerMiddleware('GuestMiddleware');
+        */
 
         /**
          * Core
@@ -105,5 +120,8 @@ class User_Share_Guest extends App {
             return $c->query('ServerContainer')->getConfig();
         });
 
+        $container->registerService('Session', function($c) {
+            return $c->query('ServerContainer')->getSession();
+        });
     }
 }

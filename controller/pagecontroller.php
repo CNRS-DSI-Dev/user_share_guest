@@ -21,13 +21,16 @@ class PageController extends Controller {
     protected $guestMapper;
     protected $userId;
     protected $userManager;
+    protected $urlGenerator;
 
-    public function __construct($appName, $request, $l, GuestMapper $guestMapper, $userId, $userManager) {
+    public function __construct($appName, $request, $l, GuestMapper $guestMapper, $userId, $userManager, $urlGenerator) {
         parent::__construct($appName, $request);
         $this->l = $l;
         $this->guestMapper = $guestMapper;
         $this->userId = $userId;
         $this->userManager = $userManager;
+        $this->urlGenerator = $urlGenerator;
+
     }
 
     /**
@@ -41,7 +44,6 @@ class PageController extends Controller {
      * @return \OCP\AppFramework\Http\TemplateResponse
      */
     public function confirm($uid, $token) {
-
         if (!$this->guestMapper->verifyGuestToken($uid, $token) || $this->guestMapper->hasGuestAccepted($uid)) {
             \OC_Util::redirectToDefaultPage();
             exit();
@@ -76,12 +78,31 @@ class PageController extends Controller {
             $this->guestMapper->updateGuest($uid, array('accepted' => 1, 'is_active' => 1, 'last_connection' => 'NOW()'));
             \OC_User::setPassword($uid, $password);
             \OC_User::login($uid, $password);
-            \OC_Util::redirectToDefaultPage();
+            $url = $this->urlGenerator->linkToRoute('user_share_guest.page.share_list');
+            $url = $this->urlGenerator->getAbsoluteURL($url);
+            header('Location: ' . $url);
             exit();
         }
 
         $templateName = 'public';
         $parameters = array('l' => $this->l, 'uid' => $uid, 'error' => $error);
         return new TemplateResponse($this->appName, $templateName, $parameters, 'guest');
+    }
+
+    /**
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     *
+     */
+    public function shareList() {
+        $user = $this->userManager->get($this->userId);
+
+        $templateName = 'list';
+        $parameters = array(
+            'l' => $this->l,
+            'user_displayname' => $user->getDisplayname(),
+            'user_uid' => $this->userId
+        );
+        return new TemplateResponse($this->appName, $templateName, $parameters, 'base');
     }
 }

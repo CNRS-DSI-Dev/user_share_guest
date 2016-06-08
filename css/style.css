@@ -68,3 +68,47 @@
     filter: alpha(opacity=30);
     opacity: .3;
 }
+
+
+/*
+    Popin
+ */
+#calque-shareguest-popin {
+    display: block;
+    position:fixed;
+    height: 100%;
+    width:100%;
+    z-index: 1000;
+}
+
+#shareguest-popin {
+    display: block;
+    position: absolute;
+    width: 350px;
+    padding: 40px 25px 20px 25px;
+    left: 50%;
+    top: 30%;
+    margin-left: -195px;
+    background: #eee;
+    border-radius: 5px;
+    box-shadow: 0 1px 1px #777;
+}
+
+#shareguest-popin .close{
+    display: inline-block;
+    position: absolute;
+    padding: 5px;
+    font-weight: bold;
+    border: 2px solid #000;
+    border-radius: 5px;
+    width: 10px;
+    height: 10px;
+    top: 10px;
+    right: 10px;
+    line-height: 10px;
+    text-align: center;
+}
+
+#shareguest-popin button{
+    margin-top: 15px;
+}
