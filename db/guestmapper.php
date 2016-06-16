@@ -19,14 +19,14 @@ class GuestMapper extends Mapper {
     const TABLE_USER_GUEST = '*PREFIX*user_guest';
     const TABLE_GUEST_SHARER = '*PREFIX*guest_sharer';
     const TABLE_SHARE = '*PREFIX*share';
-    const SHARE_GUEST_STATUT = 5;
+    const SHARE_GUEST_STATUT = 0;
     private $accepeted_keys;
 
     protected $l;
 
     public function __construct(IDb $db,  IL10N $l) {
         $this->l = $l;
-        $this->accepeted_keys = array('accepted', 'is_active', 'last_connection','token');
+        $this->accepeted_keys = array('accepted', 'is_active', 'date_expiration','token');
         parent::__construct($db, 'user_guest');
     }
 
@@ -59,9 +59,34 @@ class GuestMapper extends Mapper {
                 $data[] = $uid;
             }
         }
-        return $this->findEntities($sql, $data, 1, $offset);
+        $guests = $this->findEntities($sql, $data, $limit, $offset);
+        return count($guests) !== 1 ? $guests : $guests[0];
+
     }
 
+    /**
+     * Get guest to delete
+     *
+     */
+    public function getGuestsExpiration() {
+        $sql  = 'SELECT * FROM ' . self::TABLE_USER_GUEST . ' WHERE date_expiration < NOW()';
+        return $this->findEntities($sql, array());
+    }
+
+    public function getGuestsSharer($param = array()) {
+        $sql = 'SELECT * FROM ' . self::TABLE_GUEST_SHARER;
+        $cond = array();
+        $data = array();
+        $where = '';
+        if (!empty($param)) {
+            foreach ($param as $k => $v) {
+                $cond[] = $k . '= ?';
+                $data[] = $v;
+            }
+            $where = ' WHERE ' . implode(', ', $param);
+        }
+        return $this->execute($sql . $where, $data)->fetchAll();
+    }
 
 
     /**********
@@ -75,16 +100,6 @@ class GuestMapper extends Mapper {
      * @return Guest
      */
     public function createGuest($uid, $token) {
-
-        if (!filter_var($uid, FILTER_VALIDATE_EMAIL)) {
-            throw new \Exception($this->l->t('Error : invalid mail.'));
-            return false;
-        }
-
-        // if a guest already exists, we abort the saving
-        if ($this->getGuests($uid)) {
-            return false;
-        }
 
         $guest = new Guest();
         $guest->setUid($uid);
@@ -201,13 +216,25 @@ class GuestMapper extends Mapper {
     }
 
     /**
-     * Check if the user accepted the invitation
+     * Check if the guest accepted the invitation
      *
      * @param  string  $uid
      * @return Guest
      */
     public function hasGuestAccepted($uid) {
         $sql = 'SELECT * FROM ' . self::TABLE_USER_GUEST . ' WHERE uid = ? AND accepted = 1';
+        $result = $this->findEntities($sql, array($uid));
+        return (!empty($result));
+    }
+
+    /**
+     * Check if the guest is active
+     *
+     * @param  string  $uid
+     * @return Guest
+     */
+    public function isGuestActive($uid) {
+        $sql = 'SELECT * FROM ' . self::TABLE_USER_GUEST . ' WHERE uid = ? AND is_active = 1';
         $result = $this->findEntities($sql, array($uid));
         return (!empty($result));
     }

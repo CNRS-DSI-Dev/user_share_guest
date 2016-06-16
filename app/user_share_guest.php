@@ -123,5 +123,6 @@ class User_Share_Guest extends App {
         $container->registerService('Session', function($c) {
             return $c->query('ServerContainer')->getSession();
         });
+
     }
 }

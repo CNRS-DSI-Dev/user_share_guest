@@ -42,16 +42,14 @@ class GuestHooks {
         $uid = $data['shareWith'];
         $guest = $this->guestMapper->getGuests($uid);
         if (!empty($guest)) {
+            //$this->guestMapper->saveGuestSharer($params['uid_guest'], $params['uid_sharer'], $params['item_type'], $params['item_source']);
             $this->guestMapper->updateGuestShareStatut($uid, $data['uidOwner']);
         }
     }
 
     public function postLogin ($user) {
-        /*echo "<pre>";
-        var_dump(\OCP\User::getUserSession());
-        //\OCP\User::logout();
-        exit();*/
-        /*if (!$this->guestMapper->hasGuestAccepted() && $this->guestMapper->getGuests($user->getUid())) {
+        /*var_dump($this->guestMapper->getGuests($user->getUid()));exit();
+        if ($this->guestMapper->getGuests($user->getUid()) && !$this->guestMapper->isGuestActive()) {
             \OCP\User::logout();
             \OC_Util::redirectToDefaultPage();
             exit();

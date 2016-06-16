@@ -26,6 +26,12 @@
     color : #999999;
 }
 
+#guestForm .icon-loading-small {
+    display: inline-block !important;
+    padding-left: 10px;
+}
+
+
 /*
  Password's setting
  */

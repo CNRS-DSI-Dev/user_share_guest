@@ -25,10 +25,10 @@
       <default>false</default>
     </field>
     <field>
-      <name>last_connection</name>
+      <name>date_expiration</name>
       <type>timestamp</type>
       <notnull>true</notnull>
-      <default>CURRENT_TIMESTAMP</default>
+      <default>9999-12-31 00:00:00</default>
     </field>
     <field>
       <name>token</name>

@@ -16,7 +16,7 @@ class Guest extends Entity {
     protected $uid;
     protected $accepted;
     protected $isActive;
-    protected $lastConnection;
+    protected $dateExpiration;
     protected $token;
 
     public function __construct() {

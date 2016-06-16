@@ -6,7 +6,7 @@
     <div id="header">
         <a href="<?php print_unescaped(link_to('', 'index.php')); ?>"
             title="" id="owncloud">
-            <div class="logo-wide svg"></div>
+            <div class="logo-icon svg"></div>
         </a>
         <div id="logo-claim" style="display:none;"><?php p($theme->getLogoClaim()); ?></div>
         <div id="settings" class="svg">
@@ -92,6 +92,7 @@
     \OCP\Util::addScript('files','keyboardshortcuts');
     \OCP\Util::addScript('files','filelist');
 
+    \OCP\Util::addScript('files_sharing','share');
     \OCP\Util::addScript('files_sharing','app');
     \OCP\Util::addScript('files_sharing','sharedfilelist');
 

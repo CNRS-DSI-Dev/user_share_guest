@@ -3,9 +3,14 @@
 /**
  * ownCloud - User Share Guest
  *
- * @author Victor Bordage-Gorry <victor.bordage-gorry@globalis-ms.com>
+ * @author ShareGuest Bordage-Gorry <ShareGuest.bordage-gorry@globalis-ms.com>
  * @copyright 2016 CNRS DSI / GLOBALIS media systems
  * @license This file is licensed under the Affero General Public License version 3 or later. See the COPYING file.
+ *
+ * HOOKS :
+ *
+ * post_guestsetpassword
+ *
  */
 
 namespace OCA\User_Share_Guest\Controller;
@@ -75,10 +80,11 @@ class PageController extends Controller {
         }*/
 
         if ($error === '') {
-            $this->guestMapper->updateGuest($uid, array('accepted' => 1, 'is_active' => 1, 'last_connection' => 'NOW()'));
+            $this->guestMapper->updateGuest($uid, array('accepted' => 1, 'is_active' => 1));
             \OC_User::setPassword($uid, $password);
             \OC_User::login($uid, $password);
-            $url = $this->urlGenerator->linkToRoute('user_share_guest.page.share_list');
+            \OC_Hook::emit('OCA\User_Share_Guest', 'post_guestsetpassword', array('uid' => $uid, 'password' => $password));
+            $url = $this->urlGenerator->linkTo('user_share_guest','index.php');
             $url = $this->urlGenerator->getAbsoluteURL($url);
             header('Location: ' . $url);
             exit();
@@ -103,6 +109,6 @@ class PageController extends Controller {
             'user_displayname' => $user->getDisplayname(),
             'user_uid' => $this->userId
         );
-        return new TemplateResponse($this->appName, $templateName, $parameters, 'base');
+        return new TemplateResponseShareGuest('files', 'index', $parameters, 'user');
     }
 }

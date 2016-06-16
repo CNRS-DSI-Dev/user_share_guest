@@ -22,6 +22,7 @@ $(document).ready(function() {
         html += '<form id="guestForm">';
         html += '<label for="guestInput">' + t('user_share_guest', 'Guest mail') + '</label>';
         html += '<input type="text" name="guestInput" id="guestInput"/>';
+        html += '<span class="icon-loading-small hidden" id="guestLoad"></span>';
         html += '<input type="submit" name="guestSubmit" id="guestSubmit" value="' + t('user_share_guest', 'Guest submit') + '"/>';
         html += '</form>';
         html += '<ul id="guestList">';
@@ -72,19 +73,25 @@ $(document).ready(function() {
             data: {uid: data, itemType: itemType, itemSource:itemSource, itemSourceName, itemSourceName},
             async: false,
             success: function(resp) {
+                $('#guestSubmit').show();
+                $('#guestLoad').addClass('hidden');
                 if (resp.status == 'error') {
                     generatePopinGuest(resp.data.msg, false);
                     return false;
                 }
-                var guest = resp.data.guest;
-                console.log(guest);
-                var html = '';
-                var class_active = 'class="not-active"';
-                if (guest.is_active == '1' ) {
-                    class_active = '';
+                var user = resp.data.user;
+
+                if (user.is_guest) {
+                    var html = '';
+                    var class_active = 'class="not-active"';
+                    if (user.is_active == '1' ) {
+                        class_active = '';
+                    }
+                    html += '<li ' + class_active + '>' + user.uid + '<span class="guestDelete ui-icon" data-guest-uid ="' + user.uid + '"> x </span></li>';
+                    $('#guestList').append(html);
+                } else {
+                    OC.Share.addShareWith(0, user.uid, user.uid, false, 31, false, false);
                 }
-                html += '<li ' + class_active + '>' + guest.uid + '<span class="guestDelete ui-icon" data-guest-uid ="' + guest.uid + '"> x </span></li>';
-                $('#guestList').append(html);
                 $('#guestInput').val('');
             }
         });
@@ -139,22 +146,24 @@ $(document).ready(function() {
             type: 'GET',
             url: OC.generateUrl('apps/user_share_guest/is_guest_creation'),
             dataType: 'json',
-            data: {data: data},
+            data: {uid: data},
             async: false,
             success: function(resp) {
-                if (resp.data.creation) {
+                if (resp.data.exist == false) {
                     var txt = t('user_share_guest', 'Attention, you well took knowledge of the risks regarding the sharing of file to a guest account.');
                     generatePopinGuest(txt, true)
                 } else {
-                    launchCreateGuest();
+                    $('#guestSubmit').hide();
+                    $('#guestLoad').removeClass('hidden');
+                    setTimeout(launchCreateGuest, 0);
                 }
             }
         });
-        //
     });
 
     function launchCreateGuest() {
         var data = $('#guestInput').val();
+
         OC.Share.createShareGuest(data, itemType, itemSource, itemSourceName);
     }
 
@@ -183,10 +192,12 @@ $(document).ready(function() {
             $('#calque-shareguest-popin').remove();
         });
 
-        $('#calque-shareguest-popin .validate').click(function(){
+        $('#calque-shareguest-popin .validate').click(function(event){
             $('#calque-shareguest-popin').remove();
             event.stopPropagation();
-            launchCreateGuest();
+            $('#guestSubmit').hide();
+            $('#guestLoad').removeClass('hidden');
+            setTimeout(launchCreateGuest, 0);
         })
     }
 
