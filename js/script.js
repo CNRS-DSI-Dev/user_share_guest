@@ -44,6 +44,37 @@ $(document).ready(function() {
             $('#dropdown #guestCheckbox').trigger('click');
         }
 
+        $('#shareWith').autocomplete({source: function(search, response) {
+                var $loading = $('#dropdown .shareWithLoading');
+                $loading.removeClass('hidden');
+                $.get(OC.filePath('core', 'ajax', 'share.php'), { fetch: 'getShareWith', search: search.term.trim(), itemShares: OC.Share.itemShares }, function(result) {
+                    $loading.addClass('hidden');
+                    if (result.status == 'success' && result.data.length > 0) {
+                        var data = result.data;
+                        $.ajax({
+                            type: 'GET',
+                            url: OC.generateUrl('apps/user_share_guest/is_guest'),
+                            data: {data: result.data},
+                            datatype: 'json',
+                            async: false,
+                            success : function(resp) {
+                                if (resp.status == 'error') {
+                                    generatePopinGuest(resp.data.msg, false);
+                                    return false;
+                                }
+                                data = resp.data;
+                            }
+                        });
+                    }
+                    if (data.length > 0) {
+                        $( "#shareWith" ).autocomplete( "option", "autoFocus", true );
+                        response(data);
+                    } else {
+                        response();
+                    }
+                });
+            }
+        });
     }
 
     OC.Share.loadListGuests = function(itemType, itemSource) {

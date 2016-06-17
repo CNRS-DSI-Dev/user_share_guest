@@ -391,6 +391,41 @@ class GuestController extends APIController {
     }
 
     /**
+     * Check if users are guest
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     *
+     * @param  array  $data
+     *
+     */
+    public function isGuest($data) {
+
+        $final = array();
+        try {
+            foreach($data as $values) {
+                if(!$this->guestMapper->getGuests($values['label'])) {
+                    $final[] = $values;
+                }
+            }
+
+        } catch (\Exception $e) {
+            $response = new JSONResponse();
+            return array(
+                'status' => 'error',
+                'data' => array(
+                    'msg' => $e->getMessage(),
+                ),
+            );
+        }
+
+        return array(
+            'status' => 'success',
+            'data' => $final
+        );
+    }
+
+    /**
      * Function removing guest accounts expired
      *
      * @return boolean
@@ -459,7 +494,6 @@ class GuestController extends APIController {
     /**
      * Generate and send an email the statistics of users guest accounts
      *
-     * @return [type] [description]
      */
     public function generateStatistics() {
         $data = $this->guestMapper->getGuestsSharer();

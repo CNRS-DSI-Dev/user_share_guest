@@ -39,10 +39,11 @@ class GuestHooks {
     }
 
     public function postShared ($data) {
+
         $uid = $data['shareWith'];
         $guest = $this->guestMapper->getGuests($uid);
         if (!empty($guest)) {
-            //$this->guestMapper->saveGuestSharer($params['uid_guest'], $params['uid_sharer'], $params['item_type'], $params['item_source']);
+            $this->guestMapper->saveGuestSharer($data['shareWith'], $data['uidOwner'], $data['itemType'], $data['itemSource']);
             $this->guestMapper->updateGuestShareStatut($uid, $data['uidOwner']);
         }
     }

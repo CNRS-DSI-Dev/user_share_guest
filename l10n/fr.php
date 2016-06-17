@@ -2,7 +2,7 @@
 $TRANSLATIONS  = array(
     // Template files - Form and popup
     'Guest link' => 'Inviter et partager',
-    'Guest mail' => 'Renseigner l\'email de votre invité : ',
+    'Guest mail' => 'Renseigner l\'email de l\'invité : ',
     'Guest submit' => 'Partager',
     'Error : invalid mail.' => 'Erreur : Mail invalide',
     'Error : ' => 'Erreur : ',

@@ -43,6 +43,11 @@ $application->registerRoutes($this, array(
             'verb' => 'GET',
         ),
         array(
+            'name' => 'guest#is_guest',
+            'url' => '/is_guest',
+            'verb' => 'GET',
+        ),
+        array(
             'name' => 'guest#test',
             'url' => '/test/{data}',
             'verb' => 'GET',
