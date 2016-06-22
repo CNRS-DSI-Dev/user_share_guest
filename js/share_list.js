@@ -6,5 +6,6 @@ $(document).ready(function() {
         FileList.reload();
         $('#new').remove();
         $('#upload').remove();
+        $('a.delete-selected').remove();
     });
 });

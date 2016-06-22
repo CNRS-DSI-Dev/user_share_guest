@@ -59,8 +59,7 @@ class GuestMapper extends Mapper {
                 $data[] = $uid;
             }
         }
-        $guests = $this->findEntities($sql, $data, $limit, $offset);
-        return count($guests) !== 1 ? $guests : $guests[0];
+        return $this->findEntities($sql, $data, $limit, $offset);
 
     }
 

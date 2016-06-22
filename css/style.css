@@ -118,3 +118,11 @@
 #shareguest-popin button{
     margin-top: 15px;
 }
+
+/**
+ * Share list
+ */
+
+.app-user_share_guest table.multiselect thead {
+    left: 0;
+}

@@ -36,6 +36,10 @@ class GuestHooks {
         $this->userManager->listen('\OC\User', 'postLogin', function(\OC\User\User $user) use ($myself) {
             return $this->postLogin($user);
         });
+
+        $this->userManager->listen('\OC\User', 'postCreateUser', function(\OC\User\User $user) use ($myself) {
+            return $this->postCreateUser($user);
+        });
     }
 
     public function postShared ($data) {
@@ -56,4 +60,15 @@ class GuestHooks {
             exit();
        }*/
     }
+
+    public function postCreateUser($user) {
+        $uid = $data['shareWith'];
+        $guest = $this->guestMapper->getGuests($uid);
+        if (!empty($guest)) {
+            $filesystem = \OC\Files\Filesystem::init($uid, '/');
+            \OC\Files\Filesystem::unlink($uid . '/files/welcome.txt');
+        }
+    }
+
+
 }

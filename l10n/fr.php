@@ -11,7 +11,7 @@ $TRANSLATIONS  = array(
     'Error : you can\'t delete guest account.' => 'Erreur : vous ne pouvez pas supprimer de compte invité',
 
     // Mail
-    'Hello, ' => 'Bonjour, ',
+    'Hello,' => 'Bonjour,',
     'A user of MyCore wish you invite and share files with you' => 'Un utilsateur de MyCore souhaite vous inviter et partager des fichiers avec vous',
     'The user %s wish you invite and share files with you on MyCore.' => 'l\'utilsateur %s souhaite vous inviter et partager des fichiers avec vous sur MyCore.',
     'Accept the invitation.' => 'Accepter l\'invitation.',
@@ -20,6 +20,8 @@ $TRANSLATIONS  = array(
     'No more sharing on Mycore is connected to your guest account, the account has therefore been deleted.' => 'Plus aucun partage sur Mycore n\'est relié à votre compte invité, ce dernier a donc été supprimé.',
     'Mycore - Guests accounts created statistics' => 'Mycore - Statistiques des comptes invités créés',
     'Here is the summary of the guest accounts that you created during the year : ' => 'Voici le récapitulatif des comptes invités que vous avez créés durant l\'année :',
+    'Your guest account Mycore is inactive for too long.' => 'Votre compte invité Mycore est inactif depuis trop longtemps.',
+    'If you do not reconnect, your account will be deleted on %s.' => 'Si vous ne vous reconnectez pas, votre compte sera supprimé le %s.',
 
     // Setting password
     'Set your password' => 'Renseignez votre mot passe',

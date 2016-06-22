@@ -54,6 +54,7 @@ $guestMapper = $c->query('GuestMapper');
  */
 
 if ($guestMapper->getGuests($userId)) {
+
     $url = $_SERVER['PHP_SELF'];
 
     if (strstr($url, '/apps/') && !strstr($url, 'settings') && !strstr($url, 'user_share_guest') && !strstr($url, 'ajax')) {
