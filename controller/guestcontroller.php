@@ -113,15 +113,6 @@ class GuestController extends APIController {
                     \OC_Preferences::setValue($params['uid_guest'], 'files', 'quota', '0 GB');
                     $this->mailService->sendMailGuestCreate($params['uid_guest'], $token);
                     \OCP\Util::writeLog($this->appName, $this->l->t('Guest accounts created : ') . $params['uid_guest'], 1);
-                } else {
-
-                    // update expiration date to default value
-                    $date = mktime(00, 00, 00, date('m'), date('d') + $days, date('Y'));
-                    $data = array(
-                        'date_expiration' => date('Y-m-d H:i:s', $date),
-                        'is_active' => true
-                    );
-                    $this->guestMapper->updateGuest($params['uid_guest'], $data);
                 }
             }
         } catch (\Exception $e) {
@@ -134,11 +125,23 @@ class GuestController extends APIController {
             );
         }
         if (isset($guest)) {
+
             if(is_array($guest)) {
                 $is_active = $guest[0]->getIsActive();
             } else {
                 $is_active = $guest->getIsActive();
             }
+
+            if ($is_active) {
+                // update expiration date to default value
+                $date = mktime(00, 00, 00, 12, 31, 9999);
+                $data = array(
+                    'date_expiration' => '9999-12-31 00:00:00',
+                    'is_active' => $is_active
+                );
+                $this->guestMapper->updateGuest($params['uid_guest'], $data);
+            }
+
 
             $is_guest = true;
         }
@@ -315,8 +318,8 @@ class GuestController extends APIController {
     }
 
     /**
-     * Delete all guest informations 
-     * @param  string $uid 
+     * Delete all guest informations
+     * @param  string $uid
      */
     public function deleteGuest($uid) {
         $this->guestMapper->cleanGuest($uid);
@@ -443,7 +446,6 @@ class GuestController extends APIController {
         if (empty($guests)) {
             return false;
         }
-        var_dump($guest);exit();
         try {
             foreach($guests as $guest) {
                 $delete = true;
@@ -452,16 +454,16 @@ class GuestController extends APIController {
                     continue;
                 }
                 $uid = $guest->getUid();
-                //if (!$this->guestMapper->countSharers($uid)) {
+                if (!$this->guestMapper->countSharers($uid)) {
                     \OC_User::deleteUser($uid);
                     $this->guestMapper->cleanGuest($guest->getUid());
                     \OCP\Util::writeLog($this->appName, $this->l->t('Guest account deleted : ') . $guest->getUid(), 1);
                     $this->mailService->sendMailGuestDelete($uid);
                     \OC_Hook::emit('OCA\User_Share_Guest', 'post_guestdelete', array('guest' => $guest));
-                /*} else {
+                } else {
                     $date = mktime(00, 00, 00, 12, 31, 9999);
                     $this->guestMapper->updateGuest($uid, array('date_expiration' => date('Y-m-d H:i:s', $date)));
-                }*/
+                }
             }
         } catch (Exception $e) {
             echo $e->getMessage();
@@ -484,8 +486,11 @@ class GuestController extends APIController {
         }
         try {
             foreach ($guests as $guest) {
+                if($guest->getDateExpiration() !== '9999-12-31 00:00:00') {
+                    continue;
+                }
                 $user = $this->userManager->get($guest->getUid());
-                if ($user->getLastLogin()) {
+                if ($guest->getIsActive()) {
                     $interval = time() - $user->getLastLogin();
                 } else {
                     $interval = time() - strtotime($guest->getDateCreation());
@@ -516,6 +521,7 @@ class GuestController extends APIController {
         }
         $final = array();
         $preferences = new \OC\Preferences(\OC_DB::getConnection());
+
         foreach($data as $share) {
             $uid_sharer = $share['uid_sharer'];
             $mail = $preferences->getValue($uid_sharer, 'settings', 'email');
@@ -523,15 +529,20 @@ class GuestController extends APIController {
                 \OCP\Util::writeLog($this->appName, $this->l->t(sprintf('Statistics generation : %s haven\'t email adress.', $uid_sharer)), 3);
                 continue;
             }
+            $item = \OC\Share\Share::getItems($share['item_type'], $share['item_source'], null, $share['uid_guest'], $share['uid_sharer'], -1, null, 1);
             $user = $this->userManager->get($uid_sharer);
-            $final[$mail][$share['uid_guest']][] = array(
-                'item_type' => $share['item_type'],
-                'item_source' => $share['item_source'],
-                'activity' => date('d/m/Y', $user->getLastLogin())
+            if ($user->getLastLogin()) {
+                $activity = date('d/m/Y', $user->getLastLogin());
+            } else {
+                $activity = date('d/m/Y', $guest->getDateCreation());
+            }
+            $final[$mail][$share['uid_guest']]['files'][] = array(
+                'item_type' => $item['item_type'],
+                'item_source' => str_replace('/', '', $item['path'])
             );
+            $final[$mail][$share['uid_guest']]['activity'] = $activity;
 
         }
-
         foreach ($final as $mail => $data) {
             $this->mailService->sendMailGuestStatistics($mail, $data);
         }
@@ -547,36 +558,13 @@ class GuestController extends APIController {
      * @param string $itemSource
      */
     public function test($data = '') {
-    
-        //echo "<pre>";
+
+        echo "<pre>";
         $this->verifyInactive();
         $this->clean();
         $this->generateStatistics();
-        //$data = $this->listGuests('file', 44);
 
-        //$this->create('victor.bordage-gorry@globalis-ms.com', 'file', 44, 'test partage.txt');
-        /*
-        $dir = '/test';
-
-        $dir = \OC\Files\Filesystem::normalizePath($dir);
-        $dirInfo = \OC\Files\Filesystem::getFileInfo($dir);
-        $data = array();
-        $permissions = $dirInfo->getPermissions();
-        $sortAttribute = isset($_GET['sort']) ? $_GET['sort'] : 'name';
-        $sortDirection = isset($_GET['sortdirection']) ? ($_GET['sortdirection'] === 'desc') : false;
-
-        // make filelist
-
-        $files = \OCA\Files\Helper::getFiles($dir, $sortAttribute, $sortDirection);
-        $data['directory'] = $dir;
-        $data['files'] = \OCA\Files\Helper::formatFileInfos($files);
-        $data['permissions'] = $permissions;
-        for ($i = 0;$i < count($data['files']); $i++) {
-            if(!isset($data['files'][$i]['shareOwner'])){
-                unset($data['files'][$i]);
-            }
-        }
-        var_dump($data);*/
+        //$this->create('victor.bordage-gorry@globalis-ms.com', 'file', 44, 'coucou');
         echo "FIN";exit();
     }
 
@@ -600,12 +588,23 @@ class GuestController extends APIController {
     private function accountExist($uid) {
         if($this->userManager->userExists($uid)) {
             return true;
+        } elseif ($this::isAccountReseda($uid)) {
+            return true;
         }
         // @TODO : Labintel
         return false;
     }
 
     public static function isAccountReseda($uid) {
-        return true;
+        return false;
+
+        $url = 'https://webservices-rec.dsi.cnrs.fr/services/eairef/v1/users/v1/count.json?limit=1&query={mail:' . url_encode($uid) . '}';
+        $connect = 'username:password';
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_USERPWD, $connect);
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        $result = curl_exec($curl);
+        $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
     }
 }

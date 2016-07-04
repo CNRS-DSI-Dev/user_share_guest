@@ -30,21 +30,26 @@ $data = $_['data'];
                     <td width="20px">&nbsp;</td>
                     <td style="font-weight:normal; font-size:0.8em; line-height:1.2em; font-family:verdana,'arial',sans;">
                         <?php p($l->t('Here is the summary of the guest accounts that you created during the year : ')); ?>
-                        <?php foreach ($data as $share_with => $datashare) :
-                        ?>
-                        <strong><?php print_unescaped($share_with); ?></strong>
                         <ul>
-                        <?php
-                            foreach ($datashare as $share) :
+                            <?php foreach ($data as $share_with => $datashare) :
                             ?>
-                                <li><?php print_unescaped($share['item_source']); ?> (<?php print_unescaped($share['item_type']); ?>)</li>
+                            <li>
+                                <strong><?php print_unescaped($share_with); ?></strong> 
+                                <?php p($l->t('(Last activity : %s )', $datashare['activity'])); ?>
+                                <ul>
+                                <?php
+                                    foreach ($datashare['files'] as $share) :
+                                    ?>
+                                        <li><?php print_unescaped($share['item_source']); ?> (<?php print_unescaped($share['item_type']); ?>)</li>
+                                    <?php
+                                    endforeach;
+                                ?>
+                                </ul>
+                            </li>
                             <?php
                             endforeach;
                         ?>
                         </ul>
-                        <?php
-                        endforeach;
-                        ?>
                     </td>
                 </tr>
                 <tr>

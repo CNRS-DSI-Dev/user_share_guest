@@ -20,6 +20,8 @@ $TRANSLATIONS  = array(
     'No more sharing on Mycore is connected to your guest account, the account has therefore been deleted.' => 'Plus aucun partage sur Mycore n\'est relié à votre compte invité, ce dernier a donc été supprimé.',
     'Mycore - Guests accounts created statistics' => 'Mycore - Statistiques des comptes invités créés',
     'Here is the summary of the guest accounts that you created during the year : ' => 'Voici le récapitulatif des comptes invités que vous avez créés durant l\'année :',
+    '(Last activity : %s )' => '(Dernière activité : %s)',
+    'Your guest account on Mycore is inactive' => 'Votre compte invité Mycore est inactif',
     'Your guest account Mycore is inactive for too long.' => 'Votre compte invité Mycore est inactif depuis trop longtemps.',
     'If you do not reconnect, your account will be deleted on %s.' => 'Si vous ne vous reconnectez pas, votre compte sera supprimé le %s.',
 

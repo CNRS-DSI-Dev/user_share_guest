@@ -13,6 +13,8 @@
 
     foreach ($shares as $share_with => $datashare) {
         echo '<br/> - ' . print_unescaped($share_with) . ' : <br/>';
+        p($l->t('Here is the summary of the guest accounts that you created during the year : '));
+        echo "<br/>";
         foreach ($datashare as $values) {
             echo print_unescaped($values['item_source']) . ' (' . print_unescaped($values['item_type']) . ')<br/>';
         }
