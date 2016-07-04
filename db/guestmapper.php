@@ -249,4 +249,14 @@ class GuestMapper extends Mapper {
         $sql = 'SELECT * FROM ' . self::TABLE_USER_GUEST . ' WHERE uid = ? AND token = ?';
         return $this->findEntities($sql, array($uid, $token));
     }
+
+    /**
+     * Delete all data about guest exept user's data
+     * @param  string $uid
+     */
+    public function cleanGuest($uid) {
+        $sql = 'DELETE FROM ' . self::TABLE_GUEST_SHARER . ' WHERE uid_guest = ?';
+        $this->execute($sql, array($uid));
+        $this->deleteGuest($uid);
+    }
 }

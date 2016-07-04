@@ -64,12 +64,13 @@ class GuestController extends APIController {
 
     public function create($uid, $itemType, $itemSource, $itemSourceName) {
         $this->userManager->removeListener('\OC\User', 'postCreateUser');
-        if (!filter_var($uid, FILTER_VALIDATE_EMAIL)) {
+        $dns = dns_get_record(substr($uid, strpos($uid, '@') + 1));
+        if (!filter_var($uid, FILTER_VALIDATE_EMAIL) || empty($dns)) {
             $response = new JSONResponse();
             return array(
                 'status' => 'error',
                 'data' => array(
-                    'msg' => $this->l->t('Error : invalid mail.'),
+                    'msg' => 'Error : invalid mail.',
                 ),
             );
         }
@@ -100,32 +101,27 @@ class GuestController extends APIController {
                     return array(
                         'status' => 'error',
                         'data' => array(
-                            'msg' => $this->l->t('Error : you can\'t create guest account.'),
+                            'msg' => 'Error : you can\'t create guest account.',
                         ),
                     );
                 }
 
-                // Resada verification
-                $user_resada = 0;
-                if(!$user_resada) {
+                // guest verification
+                if (empty($guest)) {
+                    $token = $this->generateToken($uid);
+                    $guest = $this->guestMapper->createGuest($params['uid_guest'], $token);
+                    \OC_Preferences::setValue($params['uid_guest'], 'files', 'quota', '0 GB');
+                    $this->mailService->sendMailGuestCreate($params['uid_guest'], $token);
+                    \OCP\Util::writeLog($this->appName, $this->l->t('Guest accounts created : ') . $params['uid_guest'], 1);
+                } else {
 
-                    // guest verification
-                    if (empty($guest)) {
-                        $token = $this->generateToken($uid);
-                        $guest = $this->guestMapper->createGuest($params['uid_guest'], $token);
-                        \OC_Preferences::setValue($params['uid_guest'], 'files', 'quota', '0 GB');
-                        $this->mailService->sendMailGuestCreate($params['uid_guest'], $token);
-                        \OCP\Util::writeLog($this->appName, $this->l->t('Guest accounts created : ') . $params['uid_guest'], 1);
-                    } else {
-
-                        // update expiration date to default value
-                        $date = mktime(00, 00, 00, date('m'), date('d') + $days, date('Y'));
-                        $data = array(
-                            'date_expiration' => date('Y-m-d H:i:s', $date),
-                            'is_active' => true
-                        );
-                        $this->guestMapper->updateGuest($params['uid_guest'], $data);
-                    }
+                    // update expiration date to default value
+                    $date = mktime(00, 00, 00, date('m'), date('d') + $days, date('Y'));
+                    $data = array(
+                        'date_expiration' => date('Y-m-d H:i:s', $date),
+                        'is_active' => true
+                    );
+                    $this->guestMapper->updateGuest($params['uid_guest'], $data);
                 }
             }
         } catch (\Exception $e) {
@@ -313,9 +309,17 @@ class GuestController extends APIController {
         return array(
             'status' => 'success',
             'data' => array(
-                'msg' => $this->l->t('Share deleted'),
+                'msg' => 'Share deleted',
             ),
         );
+    }
+
+    /**
+     * Delete all guest informations 
+     * @param  string $uid 
+     */
+    public function deleteGuest($uid) {
+        $this->guestMapper->cleanGuest($uid);
     }
 
     /**
@@ -439,6 +443,7 @@ class GuestController extends APIController {
         if (empty($guests)) {
             return false;
         }
+        var_dump($guest);exit();
         try {
             foreach($guests as $guest) {
                 $delete = true;
@@ -449,7 +454,7 @@ class GuestController extends APIController {
                 $uid = $guest->getUid();
                 //if (!$this->guestMapper->countSharers($uid)) {
                     \OC_User::deleteUser($uid);
-                    $this->guestMapper->deleteGuest($guest->getUid());
+                    $this->guestMapper->cleanGuest($guest->getUid());
                     \OCP\Util::writeLog($this->appName, $this->l->t('Guest account deleted : ') . $guest->getUid(), 1);
                     $this->mailService->sendMailGuestDelete($uid);
                     \OC_Hook::emit('OCA\User_Share_Guest', 'post_guestdelete', array('guest' => $guest));
@@ -480,9 +485,13 @@ class GuestController extends APIController {
         try {
             foreach ($guests as $guest) {
                 $user = $this->userManager->get($guest->getUid());
-                $interval = time() - $user->getLastLogin();
+                if ($user->getLastLogin()) {
+                    $interval = time() - $user->getLastLogin();
+                } else {
+                    $interval = time() - strtotime($guest->getDateCreation());
+                }
                 if ($interval / 86400 >= 30 || 1 == 1) { // inactive for a month
-                    $date = mktime(00, 00, 00, date('m') - 3, date('d'), date('Y'));
+                    $date = mktime(00, 00, 00, date('m') + 3, date('d'), date('Y'));
                     $this->guestMapper->updateGuest($guest->getUid(), array('date_expiration' => date('Y-m-d H:i:s', $date)));
                     $this->mailService->sendMailGuestInactive($guest->getUid(), date('d/m/Y', $date));
                 }
@@ -514,7 +523,7 @@ class GuestController extends APIController {
                 \OCP\Util::writeLog($this->appName, $this->l->t(sprintf('Statistics generation : %s haven\'t email adress.', $uid_sharer)), 3);
                 continue;
             }
-            $user = $this->userManager->get($mail);
+            $user = $this->userManager->get($uid_sharer);
             $final[$mail][$share['uid_guest']][] = array(
                 'item_type' => $share['item_type'],
                 'item_source' => $share['item_source'],
@@ -538,9 +547,11 @@ class GuestController extends APIController {
      * @param string $itemSource
      */
     public function test($data = '') {
+    
         //echo "<pre>";
         $this->verifyInactive();
         $this->clean();
+        $this->generateStatistics();
         //$data = $this->listGuests('file', 44);
 
         //$this->create('victor.bordage-gorry@globalis-ms.com', 'file', 44, 'test partage.txt');
@@ -592,5 +603,9 @@ class GuestController extends APIController {
         }
         // @TODO : Labintel
         return false;
+    }
+
+    public static function isAccountReseda($uid) {
+        return true;
     }
 }

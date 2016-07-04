@@ -59,7 +59,7 @@ $(document).ready(function() {
                             async: false,
                             success : function(resp) {
                                 if (resp.status == 'error') {
-                                    generatePopinGuest(resp.data.msg, false);
+                                    generatePopinGuest(t('user_share_guest', resp.data.msg), false);
                                     return false;
                                 }
                                 data = resp.data;
@@ -87,7 +87,7 @@ $(document).ready(function() {
             async: false,
             success: function(resp) {
                 if (resp.status == 'error') {
-                    generatePopinGuest(resp.data.msg, false);
+                    generatePopinGuest(t('user_share_guest', resp.data.msg), false);
                     return false;
                 }
                 list = resp.data.list;
@@ -107,7 +107,7 @@ $(document).ready(function() {
                 $('#guestSubmit').show();
                 $('#guestLoad').addClass('hidden');
                 if (resp.status == 'error') {
-                    generatePopinGuest(resp.data.msg, false);
+                    generatePopinGuest(t('user_share_guest', resp.data.msg), false);
                     return false;
                 }
                 var user = resp.data.user;
@@ -137,7 +137,7 @@ $(document).ready(function() {
             async: false,
             success: function(resp) {
                 if (resp.status == 'error') {
-                    generatePopinGuest(resp.data.msg, false);
+                    generatePopinGuest(t('user_share_guest', resp.data.msg), false);
                     return false;
                 }
                 elem.parent('li').remove();

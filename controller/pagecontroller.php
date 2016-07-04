@@ -75,19 +75,22 @@ class PageController extends Controller {
         if ($password !== $passwordconfirm) {
             $error = $this->l->t('Passwords are different, please check your entry');
         }
-        /*elseif (!\OC_Password_Policy::testPassword($password)) {
-            $error = $this->l->t('Your password is not enough secure');
-        }*/
 
-        if ($error === '') {
-            $this->guestMapper->updateGuest($uid, array('accepted' => 1, 'is_active' => 1));
+        if ($error === '') {            
             \OC_User::setPassword($uid, $password);
             \OC_User::login($uid, $password);
             \OC_Hook::emit('OCA\User_Share_Guest', 'post_guestsetpassword', array('uid' => $uid, 'password' => $password));
-            $url = $this->urlGenerator->linkTo('user_share_guest','index.php');
-            $url = $this->urlGenerator->getAbsoluteURL($url);
-            header('Location: ' . $url);
-            exit();
+            if (!GuestController::isAccountReseda($uid)) {
+                $this->guestMapper->updateGuest($uid, array('accepted' => 1, 'is_active' => 1));
+                $url = $this->urlGenerator->linkTo('user_share_guest','index.php');
+                $url = $this->urlGenerator->getAbsoluteURL($url);
+                header('Location: ' . $url);
+                exit();    
+            } else {
+                $this->guestMapper->deleteGuest($uid);
+                \OC_Util::redirectToDefaultPage();
+                exit();
+            }
         }
 
         $templateName = 'public';

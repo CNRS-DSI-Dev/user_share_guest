@@ -48,7 +48,7 @@ $c->query('GuestHooks')->register();
 $userId = $c->query('UserId');
 $guestMapper = $c->query('GuestMapper');
 
-
+$data = $c->query('L10N')->t('Error : invalid mail.');
 /**
  * redirection if the current user is a guest
  */
