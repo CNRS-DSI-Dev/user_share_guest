@@ -22,14 +22,15 @@
 
 namespace OCA\User_Share_Guest\Controller;
 
+use \OCA\User_Share_Guest\Db\Guest;
+use \OCA\User_Share_Guest\Db\GuestMapper;
 use \OCP\AppFramework\APIController;
 use \OCP\AppFramework\Http\JSONResponse;
-use \OCP\IRequest;
 use \OCP\IL10N;
-use \OCA\User_Share_Guest\Db\GuestMapper;
-use \OCA\User_Share_Guest\Db\Guest;
+use \OCP\IRequest;
 
-class GuestController extends APIController {
+class GuestController extends APIController
+{
 
     protected $appName;
     protected $guestMapper;
@@ -40,7 +41,18 @@ class GuestController extends APIController {
     const PERMISSION_GUEST = 1;
     const SHARE_TYPE_GUEST = 0;
 
-    public function __construct($appName, IRequest $request, IL10N $l, GuestMapper $guestMapper, $userId, $userManager, $mailService) {
+    /**
+     * Initialization
+     * @param string      $appName
+     * @param IRequest    $request
+     * @param IL10N       $l
+     * @param GuestMapper $guestMapper
+     * @param string      $userId
+     * @param object      $userManager
+     * @param object      $mailService
+     */
+    public function __construct($appName, IRequest $request, IL10N $l, GuestMapper $guestMapper, $userId, $userManager, $mailService)
+    {
         parent::__construct($appName, $request, 'GET, POST');
         $this->appName = $appName;
         $this->l = $l;
@@ -61,9 +73,8 @@ class GuestController extends APIController {
      * @param  string $itemSourceName
      * @throws \Exception
      */
-
-    public function create($uid, $itemType, $itemSource, $itemSourceName) {
-        $this->userManager->removeListener('\OC\User', 'postCreateUser');
+    public function create($uid, $itemType, $itemSource, $itemSourceName)
+    {
         $dns = dns_get_record(substr($uid, strpos($uid, '@') + 1));
         if (!filter_var($uid, FILTER_VALIDATE_EMAIL) || empty($dns)) {
             $response = new JSONResponse();
@@ -95,6 +106,13 @@ class GuestController extends APIController {
 
             if (empty($user) && empty($guest)) {
                 if ($params['valid'] == true) {
+
+                    // guest verification
+                    $token = $this->generateToken($uid);
+                    $guest = $this->guestMapper->createGuest($params['uid_guest'], $token);
+                    $this->initGuestDir($params['uid_guest']);
+                    \OC_Preferences::setValue($params['uid_guest'], 'files', 'quota', '0 GB');
+                    \OCP\Util::writeLog($this->appName, $this->l->t('Guest accounts created : ') . $params['uid_guest'], 1);
                     $user = $this->userManager->createUser($params['uid_guest'], uniqid());
                 } else {
                     $response = new JSONResponse();
@@ -105,17 +123,9 @@ class GuestController extends APIController {
                         ),
                     );
                 }
-
-                // guest verification
-                if (empty($guest)) {
-                    $token = $this->generateToken($uid);
-                    $guest = $this->guestMapper->createGuest($params['uid_guest'], $token);
-                    \OC_Preferences::setValue($params['uid_guest'], 'files', 'quota', '0 GB');
-                    $this->mailService->sendMailGuestCreate($params['uid_guest'], $token);
-                    \OCP\Util::writeLog($this->appName, $this->l->t('Guest accounts created : ') . $params['uid_guest'], 1);
-                }
             }
         } catch (\Exception $e) {
+            \OCP\Util::writeLog($this->appName, $this->l->t('Error when creating a guest account : ') . $e->getMessage(), 1);
             $response = new JSONResponse();
             return array(
                 'status' => 'error',
@@ -124,12 +134,12 @@ class GuestController extends APIController {
                 ),
             );
         }
-        if (isset($guest)) {
-
+        if (!empty($guest)) {
             if(is_array($guest)) {
                 $is_active = $guest[0]->getIsActive();
             } else {
                 $is_active = $guest->getIsActive();
+                $this->mailService->sendMailGuestCreate($params['uid_guest'], $token);
             }
 
             if ($is_active) {
@@ -141,11 +151,8 @@ class GuestController extends APIController {
                 );
                 $this->guestMapper->updateGuest($params['uid_guest'], $data);
             }
-
-
             $is_guest = true;
         }
-
         try {
             \OCP\Share::shareItem(
                 $itemType,
@@ -166,7 +173,6 @@ class GuestController extends APIController {
                 ),
             );
         }
-
         $params['is_active'] = $is_active;
         $params['is_guest'] = $is_guest;
         \OC_Hook::emit('OCA\User_Share_Guest', 'post_createguest', array('data' => $params));
@@ -193,9 +199,8 @@ class GuestController extends APIController {
      * @NoAdminRequired
      *
      */
-
-    public function listGuests($itemType, $itemSource) {
-
+    public function listGuests($itemType, $itemSource)
+    {
         try {
             $list = \OC\Share\Share::getItems(
                 $itemType,
@@ -256,7 +261,8 @@ class GuestController extends APIController {
      * @param string $itemSource
      */
 
-    public function delete($uid, $itemType, $itemSource) {
+    public function delete($uid, $itemType, $itemSource)
+    {
         $params = array(
             'uid_guest' => $uid,
             'uid_sharer' => $this->userId,
@@ -321,54 +327,9 @@ class GuestController extends APIController {
      * Delete all guest informations
      * @param  string $uid
      */
-    public function deleteGuest($uid) {
+    public function deleteGuest($uid)
+    {
         $this->guestMapper->cleanGuest($uid);
-    }
-
-    /**
-     * Guest's share list (to delete)
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     *
-     * @param string $path
-     * @param string $sort
-     * @param string $sortDirection
-     */
-    public function shareList($path, $sort, $sortDirection) {
-        try {
-            $dir = \OC\Files\Filesystem::normalizePath($dir);
-            $dirInfo = \OC\Files\Filesystem::getFileInfo($dir);
-            $data = array();
-            $permissions = $dirInfo->getPermissions();
-            $sortAttribute = isset($_GET['sort']) ? $_GET['sort'] : 'name';
-            $sortDirection = isset($_GET['sortdirection']) ? ($_GET['sortdirection'] === 'desc') : false;
-
-            // make filelist
-
-            $files = \OCA\Files\Helper::getFiles($dir, $sortAttribute, $sortDirection);
-            $data['directory'] = $dir;
-            $data['files'] = \OCA\Files\Helper::formatFileInfos($files);
-            $data['permissions'] = $permissions;
-            for ($i = 0; $i < count($data['files']); $i++) {
-                if(!isset($data['files'][$i]['shareOwner'])){
-                    unset($data['files'][$i]);
-                }
-            }
-        } catch (Exception $e) {
-            $response = new JSONResponse();
-            return array(
-                'status' => 'error',
-                'data' => array(
-                    'msg' => $e->getMessage(),
-                ),
-            );
-        }
-
-        return array(
-            'status' => 'success',
-            'data' => $data
-        );
     }
 
     /**
@@ -411,8 +372,8 @@ class GuestController extends APIController {
      * @param  array  $data
      *
      */
-    public function isGuest($data) {
-
+    public function isGuest($data)
+    {
         $final = array();
         try {
             foreach($data as $values) {
@@ -440,14 +401,15 @@ class GuestController extends APIController {
      *
      * @return boolean
      */
-    public function clean() {
+    public function clean()
+    {
         $this->userManager->removeListener('\OC\User', 'postDelete');
         $guests  = $this->guestMapper->getGuestsExpiration();
         if (empty($guests)) {
             return false;
         }
         try {
-            foreach($guests as $guest) {
+            foreach ($guests as $guest) {
                 $delete = true;
                 \OC_Hook::emit('OCA\User_Share_Guest', 'pre_guestdelete', array('guest' => $guest, 'delete' => &$delete));
                 if ($delete == false) {
@@ -479,7 +441,8 @@ class GuestController extends APIController {
      *
      * @return boolean
      */
-    public function verifyInactive() {
+    public function verifyInactive()
+    {
         $guests  = $this->guestMapper->getGuests();
         if (empty($guests)) {
             return false;
@@ -511,9 +474,9 @@ class GuestController extends APIController {
 
     /**
      * Generate and send an email the statistics of users guest accounts
-     *
      */
-    public function generateStatistics() {
+    public function generateStatistics()
+    {
         $data = $this->guestMapper->getGuestsSharer();
         if (empty($data)) {
             \OCP\Util::writeLog($this->appName, $this->l->t('No guest account, statistics generation aborted.'), 1);
@@ -522,7 +485,7 @@ class GuestController extends APIController {
         $final = array();
         $preferences = new \OC\Preferences(\OC_DB::getConnection());
 
-        foreach($data as $share) {
+        foreach ($data as $share) {
             $uid_sharer = $share['uid_sharer'];
             $mail = $preferences->getValue($uid_sharer, 'settings', 'email');
             if (empty($mail)) {
@@ -541,12 +504,10 @@ class GuestController extends APIController {
                 'item_source' => str_replace('/', '', $item['path'])
             );
             $final[$mail][$share['uid_guest']]['activity'] = $activity;
-
         }
         foreach ($final as $mail => $data) {
             $this->mailService->sendMailGuestStatistics($mail, $data);
         }
-
         \OCP\Util::writeLog($this->appName, $this->l->t('Guest accounts statistics generated.'), 1);
     }
 
@@ -564,7 +525,10 @@ class GuestController extends APIController {
         $this->clean();
         $this->generateStatistics();
 
-        //$this->create('victor.bordage-gorry@globalis-ms.com', 'file', 44, 'coucou');
+        //$this->create('coucou2@globalis-ms.com', 'file', 4, 'coucou');
+        //$this->create('uuu@globalis-ms.com', 'file', 4, 'coucou');
+        //$this->initGuestDir('ttt@globalis-ms.com');
+
         echo "FIN";exit();
     }
 
@@ -575,7 +539,8 @@ class GuestController extends APIController {
      * @param  string $uid
      * @return string
      */
-    private function generateToken($uid) {
+    private function generateToken($uid)
+    {
         return base64_encode(uniqid() . $uid);
     }
 
@@ -585,26 +550,54 @@ class GuestController extends APIController {
      * @param  string $uid
      * @return boolean
      */
-    private function accountExist($uid) {
+    private function accountExist($uid)
+    {
         if($this->userManager->userExists($uid)) {
             return true;
         } elseif ($this::isAccountReseda($uid)) {
             return true;
         }
-        // @TODO : Labintel
         return false;
     }
 
-    public static function isAccountReseda($uid) {
-        return false;
-
-        $url = 'https://webservices-rec.dsi.cnrs.fr/services/eairef/v1/users/v1/count.json?limit=1&query={mail:' . url_encode($uid) . '}';
-        $connect = 'username:password';
+    /**
+     * Check if guest's email is in Reseda
+     *
+     * @param  string  $uid
+     * @return boolean
+     */
+    public static function isAccountReseda($uid)
+    {
+        $url = 'https://webservices.dsi.cnrs.fr/services/eairef/v1/users/v1/count.json?limit=1&query=' . json_encode([ 'mail' => $uid ]);
+        $connect = 'mycore:4HR2jJAtUbH6xPYsnTXB';
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_USERPWD, $connect);
         curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_USERPWD, $connect);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         $result = curl_exec($curl);
         $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $error = curl_error($curl);
+        $result = '{"count":1}';
+        $test = json_decode($result);
+        return $test->count;
+    }
+
+    /**
+     * Generate new guest's directories
+     *
+     * @param  string $uid
+     */
+    private function initGuestDir($uid)
+    {
+        $view = new \OC\Files\View('/' . $uid);
+        if (!$view->is_dir('files')) {
+            $view->mkdir('files');
+        }
+        if (!$view->is_dir('files_trashbin')) {
+            $view->mkdir('files_trashbin');
+        }
+        if (!$view->is_dir('files_trashbin/files')) {
+            $view->mkdir('files_trashbin/files');
+        }
     }
 }

@@ -1,9 +1,16 @@
 <div id="usershareguest" class="section">
     <h2><?php p($l->t('Share to a guest')); ?></h2>
     <form id="usershareguest-form" method="POST">
-        <label for="usershareguestinput"><?php p($l->t('Number of days before the deletion of a guest account when it no longer connected sharing : '));?></label>
-        <input type="text" name="usershareguest-days" id="usershareguestinput" value="<?php print_unescaped($_['usershareguest-days']) ?>" />
+        <p>
+	        <label for="usershareguestinputday"><?php p($l->t('Number of days before the deletion of a guest account when it no longer connected sharing : '));?></label>
+	        <input type="text" name="usershareguest-days" id="usershareguestinputday" value="<?php print_unescaped($_['usershareguest-days']) ?>" />
+            <span class='securitywarning'><?php print_unescaped($_['usershareguest-error-days']); ?></span>
+	    </p>
+	    <p>
+	        <label for="usershareguestinputstat"><?php p($l->t('Statistics sending date : '));?></label>
+	        <input type="text" name="usershareguest-stats" id="usershareguestinputstat" value="<?php print_unescaped($_['usershareguest-stats']) ?>" placeholder="<?php print_unescaped($l->t('dd/mm/yyyy')); ?>" />
+            <span class='securitywarning'><?php print_unescaped($_['usershareguest-error-stats']); ?></span>
+        </p>
         <input type="submit" value="<?php print_unescaped($l->t('save')); ?>"/>
-        <span class='securitywarning'><?php print_unescaped($_['usershareguest-error']); ?></span>
     </form>
 </div>

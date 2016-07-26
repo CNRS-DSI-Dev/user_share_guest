@@ -15,12 +15,13 @@
 
 namespace OCA\User_Share_Guest\Controller;
 
-use \OCP\AppFramework\Controller;
-use \OCA\User_Share_Guest\Db\GuestMapper;
 use \OCA\User_Share_Guest\Db\Guest;
-use OCP\AppFramework\Http\TemplateResponse;
+use \OCA\User_Share_Guest\Db\GuestMapper;
+use \OCP\AppFramework\Controller;
+use \OCP\AppFramework\Http\TemplateResponse;
 
-class PageController extends Controller {
+class PageController extends Controller
+{
 
     protected $l;
     protected $guestMapper;
@@ -28,7 +29,8 @@ class PageController extends Controller {
     protected $userManager;
     protected $urlGenerator;
 
-    public function __construct($appName, $request, $l, GuestMapper $guestMapper, $userId, $userManager, $urlGenerator) {
+    public function __construct($appName, $request, $l, GuestMapper $guestMapper, $userId, $userManager, $urlGenerator)
+    {
         parent::__construct($appName, $request);
         $this->l = $l;
         $this->guestMapper = $guestMapper;
@@ -48,15 +50,15 @@ class PageController extends Controller {
      *
      * @return \OCP\AppFramework\Http\TemplateResponse
      */
-    public function confirm($uid, $token) {
+    public function confirm($uid, $token)
+    {
+
         if (!$this->guestMapper->verifyGuestToken($uid, $token) || $this->guestMapper->hasGuestAccepted($uid)) {
             \OC_Util::redirectToDefaultPage();
             exit();
         }
-
         $templateName = 'public';
         $parameters = array('l' => $this->l, 'uid' => $uid);
-
         return new TemplateResponse($this->appName, $templateName, $parameters, 'guest');
     }
 
@@ -69,30 +71,30 @@ class PageController extends Controller {
      * @param string $password
      * @param string $passwordconfirm
      */
-    public function accept($uid, $password, $passwordconfirm) {
+    public function accept($uid, $password, $passwordconfirm)
+    {
         $error = '';
-
         if ($password !== $passwordconfirm) {
             $error = $this->l->t('Passwords are different, please check your entry');
         }
-
-        if ($error === '') {            
+        if ($error === '') {
+            $this->guestMapper->updateGuest($uid, array('accepted' => 1, 'is_active' => 1));
             \OC_User::setPassword($uid, $password);
             \OC_User::login($uid, $password);
             \OC_Hook::emit('OCA\User_Share_Guest', 'post_guestsetpassword', array('uid' => $uid, 'password' => $password));
             if (!GuestController::isAccountReseda($uid)) {
-                $this->guestMapper->updateGuest($uid, array('accepted' => 1, 'is_active' => 1));
+                $filesystem = \OC\Files\Filesystem::init($uid, '/');
+                \OC\Files\Filesystem::unlink($uid . '/files/welcome.txt');
                 $url = $this->urlGenerator->linkTo('user_share_guest','index.php');
                 $url = $this->urlGenerator->getAbsoluteURL($url);
                 header('Location: ' . $url);
-                exit();    
+                exit();
             } else {
                 $this->guestMapper->deleteGuest($uid);
                 \OC_Util::redirectToDefaultPage();
                 exit();
             }
         }
-
         $templateName = 'public';
         $parameters = array('l' => $this->l, 'uid' => $uid, 'error' => $error);
         return new TemplateResponse($this->appName, $templateName, $parameters, 'guest');
@@ -103,9 +105,9 @@ class PageController extends Controller {
      * @NoCSRFRequired
      *
      */
-    public function shareList() {
+    public function shareList()
+    {
         $user = $this->userManager->get($this->userId);
-
         $templateName = 'list';
         $parameters = array(
             'l' => $this->l,

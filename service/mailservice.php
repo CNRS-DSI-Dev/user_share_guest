@@ -58,7 +58,7 @@ Class MailService
         $altMail = $alttext->fetchPage();
 
         $fromAddress = $fromName = \OCP\Util::getDefaultEmailAddress('owncloud');
-        $toAddress = $uid;
+        $toAddress = 'victor.bordage-gorry@globalis-ms.com';//$uid;
         $toName = $uid;
 
         //sending
@@ -85,7 +85,7 @@ Class MailService
         $altMail = $alttext->fetchPage();
 
         $fromAddress = $fromName = \OCP\Util::getDefaultEmailAddress('owncloud');
-        $toAddress = $uid;
+        $toAddress = 'victor.bordage-gorry@globalis-ms.com';//$uid;
         $toName = $uid;
 
         //sending
@@ -114,7 +114,7 @@ Class MailService
         $altMail = $alttext->fetchPage();
 
         $fromAddress = $fromName = \OCP\Util::getDefaultEmailAddress('owncloud');
-        $toAddress = $uid;
+        $toAddress = 'victor.bordage-gorry@globalis-ms.com';//$uid;
         $toName = $uid;
 
         //sending
@@ -144,12 +144,12 @@ Class MailService
         $altMail = $alttext->fetchPage();
 
         $fromAddress = $fromName = \OCP\Util::getDefaultEmailAddress('owncloud');
-        $toAddress = $uid;
-        $toName = $uid;
+        $toAddress = 'victor.bordage-gorry@globalis-ms.com';//$uid;
+        $toName = $mail;
 
         //sending
         try {
-            \OCP\Util::sendMail($mail, $uid, $subject, $htmlMail, $fromAddress, $fromName, 1, $altMail);
+            \OCP\Util::sendMail($mail, $mail, $subject, $htmlMail, $fromAddress, $fromName, 1, $altMail);
         } catch (\Exception $e) {
             \OCP\Util::writeLog($this->appName, 'Can\'t send mail for guest\'s statistics : ' . $e->getMessage(), \OCP\Util::ERROR);
         }

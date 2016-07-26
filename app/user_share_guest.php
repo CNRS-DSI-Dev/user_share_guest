@@ -90,18 +90,6 @@ class User_Share_Guest extends App {
         });
 
         /**
-         * Middleware
-         */
-
-        /*
-        $container->registerService('GuestMiddleware', function($c){
-            return new GuestMiddleware();
-        });
-
-        $container->registerMiddleware('GuestMiddleware');
-        */
-
-        /**
          * Core
          */
         $container->registerService('UserId', function($c) {

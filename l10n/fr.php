@@ -28,7 +28,7 @@ $TRANSLATIONS  = array(
     // Setting password
     'Set your password' => 'Renseignez votre mot passe',
     'Confirm your password' => 'Confirmez votre mot de passe',
-    'Set your password to confirm the creation of your account', 'Renseignez votre mot de passe afin de confirmer la création de votre compte',
+    'Set your password to confirm the creation of your account' => 'Renseignez votre mot de passe afin de confirmer la création de votre compte',
     'Validate', 'Valider',
     'Passwords are different, please check your entry' => 'Les mots de passe sont différents, veuillez vérifier votre saisie',
     'Your password is not enough secure' => 'Votre mot de passe n\'est pas assez sécurisé',
@@ -54,5 +54,8 @@ $TRANSLATIONS  = array(
     // Admin setting
     'Share to a guest' => 'Partage à un invité',
     'Number of days before the deletion of a guest account when it no longer connected sharing : ' => 'Nombre de jours avant la suppression d\'un compte invité lorsqu\'il n\'a plus de partage relié : ',
+    'Statistics sending date : ' => 'Date d\'envoi des statistiques : ',
+    'dd/mm' => 'jj//mm',
+    'Input error, please enter a correct date.' => 'Erreure de saisie, veuillez entrer une date correcte.',
     'Input error, please enter a whole number.' => 'Erreur de saisie, veuillez renseigner un nombre entier.',
 );

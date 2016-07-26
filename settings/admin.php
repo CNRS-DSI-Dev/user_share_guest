@@ -18,8 +18,10 @@ $c = $app->getContainer();
 
 $appConfig = \OC::$server->getAppConfig();
 $l = $app->getContainer()->query('L10N');
-$error = '';
+$error_days = '';
+$error_stats = '';
 $days = $appConfig->getValue('user_share_guest', 'user_share_guest_days', 5);
+$stats = $appConfig->getValue('user_share_guest', 'user_share_guest_stats', '01/01');
 
 // saving data
 if (!empty($_POST)) {
@@ -27,12 +29,29 @@ if (!empty($_POST)) {
         $appConfig->setValue('user_share_guest', 'user_share_guest_days', intval($_POST['usershareguest-days']));
         $days = trim($_POST['usershareguest-days']);
     } else {
-        $error = $l->t('Input error, please enter a whole number.');
+        $error_days = $l->t('Input error, please enter a whole number.');
+    }
+    $reg_stat = '/([0-9]{2})\/([0-9]{2})/';
+    if (isset($_POST['usershareguest-stats']) && preg_match($reg_stat, $_POST['usershareguest-stats'])) {
+    	$val_stats = explode('/', $_POST['usershareguest-stats'] );
+    	$d = intval($val_stats[0]);
+    	$m = intval($val_stats[1]);
+    	$y = 2015;
+    	if (checkdate($m, $d, $y)) {
+    		$appConfig->setValue('user_share_guest', 'user_share_guest_stats', intval($_POST['usershareguest-stats']));
+	        $stats = trim($_POST['usershareguest-stats']);
+    	} else {
+    		$error_stats = $l->t('Input error, please enter a correct date.');
+    	}
+    } else {
+    	$error_stats = $l->t('Input error, please enter a correct date.');
     }
 }
 
 $tmpl = new \OCP\Template($c->query('AppName'), 'settings-admin');
 $tmpl->assign('usershareguest-days', $days);
-$tmpl->assign('usershareguest-error', $error);
+$tmpl->assign('usershareguest-stats', $stats);
+$tmpl->assign('usershareguest-error-days', $error_days);
+$tmpl->assign('usershareguest-error-stats', $error_stats);
 
 return $tmpl->fetchPage();

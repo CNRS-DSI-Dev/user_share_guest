@@ -32,19 +32,14 @@ $c->query('GuestHooks')->register();
  * register cron
  */
 
-/*
 \OCP\Backgroundjob::addRegularTask('\OCA\User_Share_Guest\Cron\GuestCron', 'verify');
 \OCP\Backgroundjob::addRegularTask('\OCA\User_Share_Guest\Cron\GuestCron', 'statitstics');
-*/
 
 /**
  * register settings
  */
 \OCP\App::registerAdmin($c->query('AppName'), 'settings/admin');
 
-/*
-
-*/
 $userId = $c->query('UserId');
 $guestMapper = $c->query('GuestMapper');
 
@@ -52,15 +47,15 @@ $data = $c->query('L10N')->t('Error : invalid mail.');
 /**
  * redirection if the current user is a guest
  */
-
 if ($guestMapper->getGuests($userId)) {
-
     $url = $_SERVER['PHP_SELF'];
-
     if (strstr($url, '/apps/') && !strstr($url, 'settings') && !strstr($url, 'user_share_guest') && !strstr($url, 'ajax')) {
         $urlGenerator = $c->query('ServerContainer')->getURLGenerator();
         $url = $urlGenerator->linkTo('user_share_guest','index.php');
         $url = $urlGenerator->getAbsoluteURL($url);
         header('Location: ' . $url);
+        exit();
+    } else if (strstr($url, 'settings') !== false) {
+    	\OCP\Util::addScript('user_share_guest','settings');
     }
 }

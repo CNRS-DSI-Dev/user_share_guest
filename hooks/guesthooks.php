@@ -33,17 +33,16 @@ class GuestHooks {
         $myself = $this;
         \OCP\Util::connectHook('OCP\Share', 'post_shared', $this, 'postShared');
 
-        $this->userManager->listen('\OC\User', 'postLogin', function(\OC\User\User $user) use ($myself) {
+        /*$this->userManager->listen('\OC\User', 'postLogin', function(\OC\User\User $user) use ($myself) {
             return $this->postLogin($user);
-        });
+        });*/
 
-        $this->userManager->listen('\OC\User', 'postCreateUser', function(\OC\User\User $user) use ($myself) {
+        /*$this->userManager->listen('\OC\User', 'postCreateUser', function(\OC\User\User $user) use ($myself) {
             return $this->postCreateUser($user);
-        });
+        });*/
     }
 
     public function postShared ($data) {
-
         $uid = $data['shareWith'];
         $guest = $this->guestMapper->getGuests($uid);
         if (!empty($guest)) {
@@ -52,23 +51,22 @@ class GuestHooks {
         }
     }
 
-    public function postLogin ($user) {
-        /*var_dump($this->guestMapper->getGuests($user->getUid()));exit();
-        if ($this->guestMapper->getGuests($user->getUid()) && !$this->guestMapper->isGuestActive()) {
+    /*public function postLogin ($user) {
+        if ($this->guestMapper->getGuests($user->getUid()) && !$this->guestMapper->isGuestActive($user->getUid())) {
             \OCP\User::logout();
             \OC_Util::redirectToDefaultPage();
             exit();
-       }*/
-    }
+       }
+    }*/
 
-    public function postCreateUser($user) {
-        $uid = $data['shareWith'];
+    /*public function postCreateUser($user) {
+        $uid = $user->getUid();
         $guest = $this->guestMapper->getGuests($uid);
         if (!empty($guest)) {
             $filesystem = \OC\Files\Filesystem::init($uid, '/');
             \OC\Files\Filesystem::unlink($uid . '/files/welcome.txt');
         }
-    }
+    }*/
 
 
 }

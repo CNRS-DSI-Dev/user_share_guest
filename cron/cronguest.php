@@ -13,7 +13,11 @@ class CronGuest {
     }
 
     public static function statistics() {
-        $app = new User_Share_Guest();
-        $container = $app->getContainer();
-        $container->query('GuestController')->generateStatistics();
+        $appConfig = \OC::$server->getAppConfig();
+        $day_stat = $appConfig->getValue('user_share_guest', 'user_share_guest_stats', '01/01');
+        if (date('d/m') ==  $day_stat) {
+            $app = new User_Share_Guest();
+            $container = $app->getContainer();
+            $container->query('GuestController')->generateStatistics();
+        }
     }

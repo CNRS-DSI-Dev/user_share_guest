@@ -19,8 +19,4 @@ class Guest extends Entity {
     protected $dateCreation;
     protected $dateExpiration;
     protected $token;
-
-    public function __construct() {
-
-    }
 }

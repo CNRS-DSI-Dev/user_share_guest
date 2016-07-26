@@ -60,7 +60,7 @@
 				</span>
 				<div id="expanddiv">
 				<ul>
-				<?php /*foreach($_['settingsnavigation'] as $entry):?>
+				<?php foreach($_['settingsnavigation'] as $entry):?>
 					<li>
 						<a href="<?php print_unescaped($entry['href']); ?>" title=""
 							<?php if( $entry["active"] ): ?> class="active"<?php endif; ?>>
@@ -68,13 +68,13 @@
 							<?php p($entry['name']) ?>
 						</a>
 					</li>
-				<?php endforeach; */?>
-					<li>
+				<?php endforeach; ?>
+					<!--<li>
 						<a id="info" target="_blank" href="<?php print_unescaped(OC_Config::getValue('custom_knowledgebaseurl',''));?>">
 							<img class="svg" alt="" src="<?php echo OCP\Util::imagePath('settings','help.svg'); ?>" />
 							<?php p($l->t('Help'));?>
 						</a>
-					</li>
+					</li>-->
 					<li>
 						<a id="logout" <?php print_unescaped(OC_User::getLogoutAttribute()); ?>>
 							<img class="svg" alt="" src="<?php print_unescaped(image_path('', 'actions/logout.svg')); ?>" />
