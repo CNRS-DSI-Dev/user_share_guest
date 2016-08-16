@@ -123,6 +123,11 @@ class GuestController extends APIController
                         ),
                     );
                 }
+            } else if (empty($user)) {
+                $this->initGuestDir($params['uid_guest']);
+                \OC_Preferences::setValue($params['uid_guest'], 'files', 'quota', '0 GB');
+                \OCP\Util::writeLog($this->appName, $this->l->t('Guest accounts created : ') . $params['uid_guest'], 1);
+                $user = $this->userManager->createUser($params['uid_guest'], uniqid());
             }
         } catch (\Exception $e) {
             \OCP\Util::writeLog($this->appName, $this->l->t('Error when creating a guest account : ') . $e->getMessage(), 1);
@@ -137,11 +142,13 @@ class GuestController extends APIController
         if (!empty($guest)) {
             if(is_array($guest)) {
                 $is_active = $guest[0]->getIsActive();
+                $token = $guest[0]->getToken();
             } else {
                 $is_active = $guest->getIsActive();
-                $this->mailService->sendMailGuestCreate($params['uid_guest'], $token);
+                $token = $guest->getToken();
             }
 
+            $this->mailService->sendMailGuestCreate($params['uid_guest'], $token);
             if ($is_active) {
                 // update expiration date to default value
                 $date = mktime(00, 00, 00, 12, 31, 9999);
@@ -299,7 +306,8 @@ class GuestController extends APIController
                 $date = mktime(00, 00, 00, date('m'), date('d') + $days, date('Y'));
                 $data = array(
                     'date_expiration' => date('Y-m-d H:i:s', $date),
-                    'is_active' => false
+                    'is_active' => false,
+                    'accepted' => false
                 );
                 $this->guestMapper->updateGuest($uid, $data);
                 $params['guest_expiration'] = date('Y-m-d H:i:s', $date);
@@ -512,24 +520,44 @@ class GuestController extends APIController
     }
 
     /**
-     *
      * @NoAdminRequired
-     * @NoCSRFRequired
+     * @PublicPage
      *
-     * @param string $itemSource
+     * @param string $uid
+     * @param string $password
+     * @param string $passwordconfirm
      */
-    public function test($data = '') {
+    public function accept($uid, $password, $passwordconfirm)
+    {
+        $error = '';
+        if ($password !== $passwordconfirm) {
+            $response = new JSONResponse();
+            return array(
+                'status' => 'error',
+                'msg' => 'Passwords are different, please check your entry'
+            );
+        }
+        if ($error === '') {
+            \OC_User::setPassword($uid, $password);
+            $this->guestMapper->updateGuest($uid, array('accepted' => 1, 'is_active' => 1));
+            \OC_User::login($uid, $password);
+            \OC_Hook::emit('OCA\User_Share_Guest', 'post_guestsetpassword', array('uid' => $uid, 'password' => $password));
+            if (!GuestController::isAccountReseda($uid)) {
+                $filesystem = \OC\Files\Filesystem::init($uid, '/');
+                \OC\Files\Filesystem::unlink($uid . '/files/welcome.txt');
+            } else {
+                $this->guestMapper->deleteGuest($uid);
+            }
+        } else {
+            $response = new JSONResponse();
+            return array(
+                'status' => 'error'
+            );
+        }
 
-        echo "<pre>";
-        $this->verifyInactive();
-        $this->clean();
-        $this->generateStatistics();
-
-        //$this->create('coucou2@globalis-ms.com', 'file', 4, 'coucou');
-        //$this->create('uuu@globalis-ms.com', 'file', 4, 'coucou');
-        //$this->initGuestDir('ttt@globalis-ms.com');
-
-        echo "FIN";exit();
+        return array(
+            'status' => 'success'
+        );
     }
 
 

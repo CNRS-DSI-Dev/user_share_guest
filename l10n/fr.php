@@ -9,7 +9,8 @@ $TRANSLATIONS  = array(
     'Share deleted' => 'Partage supprimé',
     'Error : you can\'t create guest account.' => 'Erreur : vous ne pouvez pas créer de compte invité',
     'Error : you can\'t delete guest account.' => 'Erreur : vous ne pouvez pas supprimer de compte invité',
-
+    'Validate' => 'Valider',
+    'Cancel' => 'Annuler',
     // Mail
     'Hello,' => 'Bonjour,',
     'A user of MyCore wish you invite and share files with you' => 'Un utilsateur de MyCore souhaite vous inviter et partager des fichiers avec vous',
@@ -35,11 +36,12 @@ $TRANSLATIONS  = array(
     'Log out' => 'Se déconnecter',
     'Help' => 'Aide',
     'Name' => 'Nom',
+    'Error : please, check password\'s validity' => 'Erreur : veuillez vérifier la validité de votre mot de passe.',
 
     // Share list
     'Share time' => 'Date de partage',
     'No files have been shared with you yet.' => 'Aucun fichier n\'a été partagé avec vous.',
-    'Attention, you well took knowledge of the risks regarding the sharing of file to a guest account.' => 'Attention, vous avez bien pris connaissances des risques concernant le partage de fichier à un compte invité',
+    'Warning, you well took knowledge of the risks regarding the sharing of file to a guest account.' => 'Attention, vous avez bien pris connaissances des risques concernant le partage de fichier à un compte invité',
 
     // Log message
     'Guest accounts created : ' => 'Compte invité créé : ',

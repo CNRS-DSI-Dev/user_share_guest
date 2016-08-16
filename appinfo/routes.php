@@ -48,6 +48,11 @@ $application->registerRoutes($this, array(
             'verb' => 'GET',
         ),
         array(
+            'name' => 'guest#accept',
+            'url' => '/accept',
+            'verb' => 'POST',
+        ),
+        array(
             'name' => 'guest#test',
             'url' => '/test/{data}',
             'verb' => 'GET',

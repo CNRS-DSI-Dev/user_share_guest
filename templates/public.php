@@ -12,13 +12,8 @@
 <div id="guestConfirm">
 
     <p><?php p($l->t('Set your password to confirm the creation of your account')); ?></p>
-
-    <?php if (isset($_['error'])): ?>
-        <p class="notification">
-        <?php p($_['error']); ?>
-        </p>
-    <?php endif; ?>
-    <form action="" method="POST">
+    <p class="notification"></p>
+    <form action="" method="POST" id="set_guest_password">
         <input type="hidden" name="uid" value="<?= $_['uid'] ?>"/>
         <div class="grouptop">
             <label class="infield" for="password"><?php p($l->t('Set your password')); ?></label>
@@ -33,4 +28,7 @@
         <input type="submit" id="submit" class="primary" value="<?php p($l->t('Validate')); ?>" />
     </form>
 </div>
+
+<?php
+\OCP\Util::addScript('user_share_guest','public');
 

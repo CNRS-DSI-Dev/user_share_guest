@@ -241,8 +241,8 @@ class GuestMapper extends Mapper {
     /**
      * Check the token's validity
      *
-     * @param  string $uid   [description]
-     * @param  string $token [description]
+     * @param  string $uid
+     * @param  string $token
      * @return Guest
      */
     public function verifyGuestToken($uid, $token) {

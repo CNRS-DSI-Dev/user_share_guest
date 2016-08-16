@@ -181,7 +181,7 @@ $(document).ready(function() {
             async: false,
             success: function(resp) {
                 if (resp.data.exist == false) {
-                    var txt = t('user_share_guest', 'Attention, you well took knowledge of the risks regarding the sharing of file to a guest account.');
+                    var txt = t('user_share_guest', 'Warning, you well took knowledge of the risks regarding the sharing of file to a guest account.');
                     generatePopinGuest(txt, true)
                 } else {
                     $('#guestSubmit').hide();
@@ -213,7 +213,7 @@ $(document).ready(function() {
         html += '<span class="close">X</span>';
         html += '<p>' + txt + '</p>';
         if (addbutton) {
-            html += '<button class="validate">Valider</button> <button class="cancel">Annuler</button>'
+            html += '<button class="validate">' + t('user_share_guest', 'Cancel') + '</button> <button class="cancel">' + t('user_share_guest', 'Cancel') + '</button>'
         }
         html += '</div></div>';
         $('body').append(html);

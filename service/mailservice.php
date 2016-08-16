@@ -58,7 +58,7 @@ Class MailService
         $altMail = $alttext->fetchPage();
 
         $fromAddress = $fromName = \OCP\Util::getDefaultEmailAddress('owncloud');
-        $toAddress = 'victor.bordage-gorry@globalis-ms.com';//$uid;
+        $toAddress = $uid;
         $toName = $uid;
 
         //sending
@@ -85,7 +85,7 @@ Class MailService
         $altMail = $alttext->fetchPage();
 
         $fromAddress = $fromName = \OCP\Util::getDefaultEmailAddress('owncloud');
-        $toAddress = 'victor.bordage-gorry@globalis-ms.com';//$uid;
+        $toAddress = $uid;
         $toName = $uid;
 
         //sending
@@ -114,7 +114,7 @@ Class MailService
         $altMail = $alttext->fetchPage();
 
         $fromAddress = $fromName = \OCP\Util::getDefaultEmailAddress('owncloud');
-        $toAddress = 'victor.bordage-gorry@globalis-ms.com';//$uid;
+        $toAddress = $uid;
         $toName = $uid;
 
         //sending
@@ -127,7 +127,7 @@ Class MailService
 
     public function sendMailGuestStatistics($mail, $data) {
 
-        $mail = 'victor.bordage-gorry@globalis-ms.com';
+        //$mail = 'victor.bordage-gorry@globalis-ms.com';
         // Mail part
         $theme = new \OC_Defaults;
         $subject = (string)$this->l->t('Mycore - Guests accounts created statistics');

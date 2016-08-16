@@ -52,7 +52,6 @@ class PageController extends Controller
      */
     public function confirm($uid, $token)
     {
-
         if (!$this->guestMapper->verifyGuestToken($uid, $token) || $this->guestMapper->hasGuestAccepted($uid)) {
             \OC_Util::redirectToDefaultPage();
             exit();
@@ -60,60 +59,5 @@ class PageController extends Controller
         $templateName = 'public';
         $parameters = array('l' => $this->l, 'uid' => $uid);
         return new TemplateResponse($this->appName, $templateName, $parameters, 'guest');
-    }
-
-    /**
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     * @PublicPage
-     *
-     * @param string $uid
-     * @param string $password
-     * @param string $passwordconfirm
-     */
-    public function accept($uid, $password, $passwordconfirm)
-    {
-        $error = '';
-        if ($password !== $passwordconfirm) {
-            $error = $this->l->t('Passwords are different, please check your entry');
-        }
-        if ($error === '') {
-            $this->guestMapper->updateGuest($uid, array('accepted' => 1, 'is_active' => 1));
-            \OC_User::setPassword($uid, $password);
-            \OC_User::login($uid, $password);
-            \OC_Hook::emit('OCA\User_Share_Guest', 'post_guestsetpassword', array('uid' => $uid, 'password' => $password));
-            if (!GuestController::isAccountReseda($uid)) {
-                $filesystem = \OC\Files\Filesystem::init($uid, '/');
-                \OC\Files\Filesystem::unlink($uid . '/files/welcome.txt');
-                $url = $this->urlGenerator->linkTo('user_share_guest','index.php');
-                $url = $this->urlGenerator->getAbsoluteURL($url);
-                header('Location: ' . $url);
-                exit();
-            } else {
-                $this->guestMapper->deleteGuest($uid);
-                \OC_Util::redirectToDefaultPage();
-                exit();
-            }
-        }
-        $templateName = 'public';
-        $parameters = array('l' => $this->l, 'uid' => $uid, 'error' => $error);
-        return new TemplateResponse($this->appName, $templateName, $parameters, 'guest');
-    }
-
-    /**
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     *
-     */
-    public function shareList()
-    {
-        $user = $this->userManager->get($this->userId);
-        $templateName = 'list';
-        $parameters = array(
-            'l' => $this->l,
-            'user_displayname' => $user->getDisplayname(),
-            'user_uid' => $this->userId
-        );
-        return new TemplateResponseShareGuest('files', 'index', $parameters, 'user');
     }
 }
