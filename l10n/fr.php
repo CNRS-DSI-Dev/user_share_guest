@@ -41,7 +41,7 @@ $TRANSLATIONS  = array(
     // Share list
     'Share time' => 'Date de partage',
     'No files have been shared with you yet.' => 'Aucun fichier n\'a été partagé avec vous.',
-    'Warning, you well took knowledge of the risks regarding the sharing of file to a guest account.' => 'Attention, vous avez bien pris connaissances des risques concernant le partage de fichier à un compte invité',
+    'Warning, you well took knowledge of the risks regarding the sharing of file to a guest account.' => 'Attention, vous avez bien pris connaissance des risques concernant le partage de fichier à un compte invité',
 
     // Log message
     'Guest accounts created : ' => 'Compte invité créé : ',

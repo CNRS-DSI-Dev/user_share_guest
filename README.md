@@ -24,6 +24,10 @@ On Owncloud, enable the application on "setting/apps"
 
 ## Config
 
+If you want to allow access to some part of the site to the guests, add the name of your applications in config.php as follow :
+
+'user_share_guest_allowed_apps' => array('app1', 'app2')
+
 ## Hooks
 
          Hooks          |     Access to data     |     data modifications     |

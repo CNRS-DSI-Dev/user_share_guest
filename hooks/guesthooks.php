@@ -42,7 +42,4 @@ class GuestHooks {
             $this->guestMapper->updateGuestShareStatut($uid, $data['uidOwner']);
         }
     }
-
-
-
 }

@@ -213,7 +213,7 @@ $(document).ready(function() {
         html += '<span class="close">X</span>';
         html += '<p>' + txt + '</p>';
         if (addbutton) {
-            html += '<button class="validate">' + t('user_share_guest', 'Cancel') + '</button> <button class="cancel">' + t('user_share_guest', 'Cancel') + '</button>'
+            html += '<button class="validate">' + t('user_share_guest', 'Validate') + '</button> <button class="cancel">' + t('user_share_guest', 'Cancel') + '</button>'
         }
         html += '</div></div>';
         $('body').append(html);

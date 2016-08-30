@@ -11,26 +11,21 @@
 namespace OCA\User_Share_Guest\Service;
 
 use \OCP\IL10N;
-use \OCP\IConfig;
 
-/**
- * Send mail on hook trigger
- */
 Class MailService
 {
     protected $appName;
     protected $l;
-    protected $config;
+
     protected $userManager;
     protected $userId;
     protected $urlGenerator;
 
-    public function __construct($appName, $userId, IL10N $l, IConfig $config, $userManager, $urlGenerator)
+    public function __construct($appName, $userId, IL10N $l, IConfig $userManager, $urlGenerator)
     {
         $this->appName = $appName;
         $this->userId = $userId;
         $this->l = $l;
-        $this->config = $config;
         $this->userManager = $userManager;
         $this->urlGenerator = $urlGenerator;
     }
