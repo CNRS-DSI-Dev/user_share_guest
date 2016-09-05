@@ -83,7 +83,6 @@ class User_Share_Guest extends App {
                 $c->query('AppName'),
                 $c->query('UserId'),
                 $c->query('L10N'),
-                $c->query('Config'),
                 $c->query('UserManager'),
                 $c->query('ServerContainer')->getURLGenerator()
             );

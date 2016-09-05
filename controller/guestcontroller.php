@@ -605,6 +605,7 @@ class GuestController extends APIController
         $result = curl_exec($curl);
         $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         $error = curl_error($curl);
+        //$result = '{count:1}';
         $result = json_decode($result);
         return $result->count;
     }

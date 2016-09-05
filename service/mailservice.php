@@ -21,7 +21,7 @@ Class MailService
     protected $userId;
     protected $urlGenerator;
 
-    public function __construct($appName, $userId, IL10N $l, IConfig $userManager, $urlGenerator)
+    public function __construct($appName, $userId, IL10N $l, $userManager, $urlGenerator)
     {
         $this->appName = $appName;
         $this->userId = $userId;

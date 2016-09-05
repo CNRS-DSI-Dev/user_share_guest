@@ -105,6 +105,7 @@ class GuestMapper extends Mapper {
         $guest->setAccepted(false);
         $guest->setIsActive(false);
         $guest->setToken($token);
+        $guest->setDateCreation(date("Y-m-d H:i:s"));
 
         $this->insert($guest);
 

@@ -28,7 +28,6 @@
       <name>date_creation</name>
       <type>timestamp</type>
       <notnull>true</notnull>
-      <default>CURRENT_TIMESTAMP</default>
     </field>
     <field>
       <name>date_expiration</name>
