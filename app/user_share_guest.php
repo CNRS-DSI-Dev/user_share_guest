@@ -37,7 +37,8 @@ class User_Share_Guest extends App {
                 $c->query('GuestMapper'),
                 $c->query('UserId'),
                 $c->query('UserManager'),
-                $c->query('MailService')
+                $c->query('MailService'),
+                $c->query('Config')
             );
         });
 

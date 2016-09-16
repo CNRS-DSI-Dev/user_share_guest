@@ -37,6 +37,7 @@ class GuestController extends APIController
     protected $userManager;
     protected $userId;
     protected $mailService;
+    protected $config;
 
     const PERMISSION_GUEST = 1;
     const SHARE_TYPE_GUEST = 0;
@@ -51,7 +52,7 @@ class GuestController extends APIController
      * @param object      $userManager
      * @param object      $mailService
      */
-    public function __construct($appName, IRequest $request, IL10N $l, GuestMapper $guestMapper, $userId, $userManager, $mailService)
+    public function __construct($appName, IRequest $request, IL10N $l, GuestMapper $guestMapper, $userId, $userManager, $mailService, $config)
     {
         parent::__construct($appName, $request, 'GET, POST');
         $this->appName = $appName;
@@ -60,6 +61,7 @@ class GuestController extends APIController
         $this->userId = $userId;
         $this->userManager = $userManager;
         $this->mailService = $mailService;
+        $this->config = $config;
     }
 
     /**
@@ -75,8 +77,11 @@ class GuestController extends APIController
      */
     public function create($uid, $itemType, $itemSource, $itemSourceName)
     {
-        $dns = dns_get_record(substr($uid, strpos($uid, '@') + 1));
-        if (!filter_var($uid, FILTER_VALIDATE_EMAIL) || empty($dns)) {
+        $allowed_domains = $this->config->getSystemValue('user_share_guest_allowed_mail_domains');
+        $domain = substr($uid, strpos($uid, '@') + 1);
+        $dns = dns_get_record($domain);
+
+        if (!filter_var($uid, FILTER_VALIDATE_EMAIL) || (empty($dns) && !in_array($domain, $allowed_domains))) {
             $response = new JSONResponse();
             return array(
                 'status' => 'error',
