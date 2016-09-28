@@ -28,8 +28,7 @@ If you want to allow access to some part of the site to the guests, add the name
 
 'user_share_guest_allowed_apps' => array('app1', 'app2')
 
-If you want to allow specifics mail domains, add the domain in config.php as follow :
-'user_share_guest_allowed_mail_domains' =>  array('my.specific.domain')
+If you want to allow specifics mail domains, add the domain in administration page :
 
 ## Hooks
 

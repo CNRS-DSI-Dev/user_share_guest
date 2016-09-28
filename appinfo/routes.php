@@ -53,9 +53,14 @@ $application->registerRoutes($this, array(
             'verb' => 'POST',
         ),
         array(
-            'name' => 'guest#test',
-            'url' => '/test/{data}',
-            'verb' => 'GET',
+            'name' => 'guest#add_domain',
+            'url' => '/adddomain',
+            'verb' => 'POST',
+        ),
+        array(
+            'name' => 'guest#delete_domain',
+            'url' => '/deletedomain',
+            'verb' => 'get',
         ),
         // PAGE CONTROLLER
         array(

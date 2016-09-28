@@ -77,7 +77,9 @@ class GuestController extends APIController
      */
     public function create($uid, $itemType, $itemSource, $itemSourceName)
     {
-        $allowed_domains = $this->config->getSystemValue('user_share_guest_allowed_mail_domains');
+        $appConfig = \OC::$server->getAppConfig();
+        $domains_serialized = $appConfig->getValue('user_share_guest', 'user_share_guest_domains', '');
+        $allowed_domains = array_values(unserialize($domains_serialized));
         $domain = substr($uid, strpos($uid, '@') + 1);
         $dns = dns_get_record($domain);
 
@@ -546,7 +548,7 @@ class GuestController extends APIController
             \OC_User::setPassword($uid, $password);
             $this->guestMapper->updateGuest($uid, array('accepted' => 1, 'is_active' => 1));
             \OC_User::login($uid, $password);
-            \OC_Hook::emit('OCA\User_Share_Guest', 'post_guestsetpassword', array('uid' => $uid, 'password' => $password));
+            \OC_Hook::emit('OCA\User_Share_Guest', 'post_guestsetp    margin: 0;assword', array('uid' => $uid, 'password' => $password));
             if (!GuestController::isAccountReseda($uid)) {
                 $filesystem = \OC\Files\Filesystem::init($uid, '/');
                 \OC\Files\Filesystem::unlink($uid . '/files/welcome.txt');
@@ -566,6 +568,44 @@ class GuestController extends APIController
     }
 
 
+    public function addDomain ($domain)
+    {
+        $appConfig = \OC::$server->getAppConfig();
+        $domains_serialized = $appConfig->getValue('user_share_guest', 'user_share_guest_domains', '');
+        $domains = unserialize($domains_serialized);
+        if (empty($domains) || !empty($domains) && !in_array($domain, array_values($domains))) {
+            $domains[] = $domain;
+            $appConfig->setValue('user_share_guest', 'user_share_guest_domains', serialize($domains));
+            return array(
+                'status' => 'success'
+            );
+        }
+        $response = new JSONResponse();
+        return array(
+            'status' => 'error',
+            'msg' => 'Domain already registered.',
+        );
+    }
+
+    public function deleteDomain ($domain)
+    {
+        $appConfig = \OC::$server->getAppConfig();
+        $domains_serialized = $appConfig->getValue('user_share_guest', 'user_share_guest_domains', '');
+        $domains = unserialize($domains_serialized);
+        if (!empty($domains) && in_array($domain, array_values($domains))) {
+            $key = array_search($domain, $domains);
+            unset($domains[$key]);
+            $appConfig->setValue('user_share_guest', 'user_share_guest_domains', serialize($domains));
+            return array(
+                'status' => 'success'
+            );
+        }
+        $response = new JSONResponse();
+        return array(
+            'status' => 'error',
+            'msg' => 'The domain to be deleted does not exist',
+        );
+    }
     /**
      * Generate unique token
      *

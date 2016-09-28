@@ -57,7 +57,11 @@ $TRANSLATIONS  = array(
     'Share to a guest' => 'Partage à un invité',
     'Number of days before the deletion of a guest account when it no longer connected sharing : ' => 'Nombre de jours avant la suppression d\'un compte invité lorsqu\'il n\'a plus de partage relié : ',
     'Statistics sending date : ' => 'Date d\'envoi des statistiques : ',
-    'dd/mm' => 'jj//mm',
+    'Specific domain allowed : ' => 'Domaine spécifique accepté  : ',
+    'dd/mm' => 'jj/mm',
     'Input error, please enter a correct date.' => 'Erreure de saisie, veuillez entrer une date correcte.',
     'Input error, please enter a whole number.' => 'Erreur de saisie, veuillez renseigner un nombre entier.',
+    'The domain to be deleted does not exist.' => 'Le domaine à supprimer n\'existe pas.',
+    'Domain already registered.' => 'Le domaine est déjà enregistré.'
+
 );

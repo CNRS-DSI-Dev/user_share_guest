@@ -14,11 +14,16 @@
     display: block;
 }
 
-#guestList .guestDelete {
+.guestDelete {
     background-position: -94px -125px;
     float: none;
     display: inline-block;
     margin: 0px 0 0 0px;
+}
+
+#usershareguest-form-domains .guestDelete {
+    float: none;
+    margin: 0;
 }
 
 

@@ -12,6 +12,8 @@ namespace OCA\User_Share_Guest;
 use OCA\User_Share_Guest\App\User_Share_Guest;
 
 \OC_Util::checkAdminUser();
+\OCP\Util::addScript('user_share_guest','settings-admin');
+\OCP\Util::addStyle('user_share_guest','style');
 
 $app = new User_Share_Guest;
 $c = $app->getContainer();
@@ -22,6 +24,7 @@ $error_days = '';
 $error_stats = '';
 $days = $appConfig->getValue('user_share_guest', 'user_share_guest_days', 5);
 $stats = $appConfig->getValue('user_share_guest', 'user_share_guest_stats', '01/01');
+$domains = $appConfig->getValue('user_share_guest', 'user_share_guest_domains', '');
 
 // saving data
 if (!empty($_POST)) {
@@ -51,7 +54,9 @@ if (!empty($_POST)) {
 $tmpl = new \OCP\Template($c->query('AppName'), 'settings-admin');
 $tmpl->assign('usershareguest-days', $days);
 $tmpl->assign('usershareguest-stats', $stats);
+$tmpl->assign('usershareguest-domains', $domains);
 $tmpl->assign('usershareguest-error-days', $error_days);
 $tmpl->assign('usershareguest-error-stats', $error_stats);
+
 
 return $tmpl->fetchPage();

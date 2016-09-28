@@ -206,8 +206,6 @@ $(document).ready(function() {
         OC.Share.deleteGuest($elem.data('guest-uid'), itemType, itemSource, $elem);
     });
 
-
-
     function generatePopinGuest(txt, addbutton) {
         var html = '<div id="calque-shareguest-popin"><div id="shareguest-popin">';
         html += '<span class="close">X</span>';
