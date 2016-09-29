@@ -7,14 +7,14 @@ $(document).ready(function() {
     OC.Share.showDropDown = function(itemType, itemSource, appendTo, link, possiblePermissions, filename) {
         oldShowDropdown(itemType, itemSource, appendTo, link, possiblePermissions, filename);
 
-        $('#shareWithList li').each(function() {
+        /*$('#shareWithList li').each(function() {
             var that = $(this);
             if(that.data('share-type') == '-1') {
                 that.remove();
             }
-        });
+        });*/
 
-        var data = OC.Share.loadListGuests(itemType, itemSource);
+        //var data = OC.Share.loadListGuests(itemType, itemSource);
         var html = '<div id="guest" class="guestShare">';
         html += '<span class="icon-loading-small hidden"></span>';
         html += '<input type="checkbox" name="guestCheckbox" id="guestCheckbox" value="1" />';
@@ -27,6 +27,7 @@ $(document).ready(function() {
         html += '</form>';
         html += '<ul id="guestList">';
 
+        /*
         for (var i = 0; i < data.length; i++) {
             var guest = data[i];
             var class_active = 'class="not-active"';
@@ -35,14 +36,14 @@ $(document).ready(function() {
             }
             html += '<li ' + class_active + '>' + guest.uid + '<span class="guestDelete ui-icon" data-guest-uid ="' + guest.uid + '"> x </span></li>';
             $('#shareWithList li[title="' + guest.uid + '"]').remove();
-        }
+        }*/
 
         html += '</ul>';
         html += '</div>';
         $('#dropdown').append(html);
-        if (data.length > 0) {
+        /*if (data.length > 0) {
             $('#dropdown #guestCheckbox').trigger('click');
-        }
+        }*/
 
         $('#shareWith').autocomplete({source: function(search, response) {
                 var $loading = $('#dropdown .shareWithLoading');
@@ -111,18 +112,7 @@ $(document).ready(function() {
                     return false;
                 }
                 var user = resp.data.user;
-
-                if (user.is_guest) {
-                    var html = '';
-                    var class_active = 'class="not-active"';
-                    if (user.is_active == '1' ) {
-                        class_active = '';
-                    }
-                    html += '<li ' + class_active + '>' + user.uid + '<span class="guestDelete ui-icon" data-guest-uid ="' + user.uid + '"> x </span></li>';
-                    $('#guestList').append(html);
-                } else {
-                    OC.Share.addShareWith(0, user.uid, user.uid, false, 31, false, false);
-                }
+                OC.Share.addShareWith(0, user.uid, user.uid, false, 31, false, false);
                 $('#guestInput').val('');
             }
         });

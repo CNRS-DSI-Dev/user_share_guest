@@ -4,8 +4,6 @@ $(document).ready(function() {
             Download: FileList.fileActions.actions.all.Download
         };
         FileList.reload();
-        $('#new').remove();
-        $('#upload').remove();
         $('a.delete-selected').remove();
     });
 });
