@@ -58,19 +58,21 @@ if ($guestMapper->getGuests($userId)) {
             $app_url = substr($app_url, 0, strpos($app_url, '/'));
         }
         $config = $c->query('Config');
-        $default_allowed_apps = array('user_share_guest', 'ajax', 'core');
-        $allowed_apps = array_merge($default_allowed_apps, $config->getSystemValue('user_share_guest_allowed_apps'));
-        $redirect = true;
 
+        $forbidden_apps = $config->getSystemValue('user_share_guest_forbidden_apps');
+        $redirect = false;
+
+
+        foreach ($forbidden_apps as $app) {
+            if ($app == $app_url) {
+                $redirect = true;
+            }
+        }
         // cas ajax
         if (strstr($_SERVER['PHP_SELF'], '/ajax/')) {
             $redirect = false;
         }
-        foreach ($allowed_apps as $app) {
-            if ($app == $app_url) {
-                $redirect = false;
-            }
-        }
+
         if ($redirect) {
             $urlGenerator = $c->query('ServerContainer')->getURLGenerator();
             $url = $urlGenerator->linkTo('user_share_guest','index.php');

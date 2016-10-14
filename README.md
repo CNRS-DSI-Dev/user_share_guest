@@ -24,9 +24,9 @@ On Owncloud, enable the application on "setting/apps"
 
 ## Config
 
-If you want to allow access to some part of the site to the guests, add the name of your applications in config.php as follow :
+If you want to deny access to some part of the site to the guests, add the name of your applications in config.php as follow :
 
-'user_share_guest_allowed_apps' => array('app1', 'app2')
+'user_share_guest_forbidden_apps' => array('app1', 'app2')
 
 If you want to allow specifics mail domains, add the domain in administration page :
 
