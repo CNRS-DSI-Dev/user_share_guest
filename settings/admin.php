@@ -41,7 +41,7 @@ if (!empty($_POST)) {
     	$m = intval($val_stats[1]);
     	$y = 2015;
     	if (checkdate($m, $d, $y)) {
-    		$appConfig->setValue('user_share_guest', 'user_share_guest_stats', intval($_POST['usershareguest-stats']));
+    		$appConfig->setValue('user_share_guest', 'user_share_guest_stats', $_POST['usershareguest-stats']);
 	        $stats = trim($_POST['usershareguest-stats']);
     	} else {
     		$error_stats = $l->t('Input error, please enter a correct date.');
