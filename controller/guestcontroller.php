@@ -155,7 +155,13 @@ class GuestController extends APIController
                 $token = $guest->getToken();
             }
 
+            $this->config->setUserValue($params['uid_guest'], 'settings', 'email');
+            $this->config->setUserValue(
+                $params['uid_guest'], 'owncloud', 'lostpassword', hash('sha256', $token)
+            );
             $this->mailService->sendMailGuestCreate($params['uid_guest'], $token);
+
+
             if ($is_active) {
                 // update expiration date to default value
                 $date = mktime(00, 00, 00, 12, 31, 9999);
@@ -377,6 +383,9 @@ class GuestController extends APIController
             )
         );
     }
+
+
+    ///
 
     /**
      * Check if users are guest
@@ -614,7 +623,7 @@ class GuestController extends APIController
      */
     private function generateToken($uid)
     {
-        return base64_encode(uniqid() . $uid);
+        return hash('sha256', \OC_Util::generateRandomBytes(30));
     }
 
     /**
@@ -673,4 +682,6 @@ class GuestController extends APIController
             $view->mkdir('files_trashbin/files');
         }
     }
+
+
 }
