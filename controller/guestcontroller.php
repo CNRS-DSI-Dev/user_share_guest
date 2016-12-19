@@ -77,6 +77,7 @@ class GuestController extends APIController
      */
     public function create($uid, $itemType, $itemSource, $itemSourceName)
     {
+        \OCP\Util::writeLog($this->appName, $this->l->t('initialization creation guest') . $uid, 1);
         $appConfig = \OC::$server->getAppConfig();
         $domains_serialized = $appConfig->getValue('user_share_guest', 'user_share_guest_domains', '');
         $allowed_domains = array_values(unserialize($domains_serialized));
@@ -119,7 +120,7 @@ class GuestController extends APIController
                     $guest = $this->guestMapper->createGuest($params['uid_guest'], $token);
                     $this->initGuestDir($params['uid_guest']);
                     \OC_Preferences::setValue($params['uid_guest'], 'files', 'quota', '0 GB');
-                    \OCP\Util::writeLog($this->appName, $this->l->t('Guest accounts created : ') . $params['uid_guest'], 1);
+                    \OCP\Util::writeLog($this->appName, $this->l->t('Guest and user accounts created : ') . $params['uid_guest'], 1);
                     $user = $this->userManager->createUser($params['uid_guest'], uniqid());
                 } else {
                     $response = new JSONResponse();
@@ -159,8 +160,8 @@ class GuestController extends APIController
             $this->config->setUserValue(
                 $params['uid_guest'], 'owncloud', 'lostpassword', hash('sha256', $token)
             );
+            \OCP\Util::writeLog($this->appName, $this->l->t('Send mail creation guest'), 1);
             $this->mailService->sendMailGuestCreate($params['uid_guest'], $token);
-
 
             if ($is_active) {
                 // update expiration date to default value
@@ -174,6 +175,7 @@ class GuestController extends APIController
             $is_guest = true;
         }
         try {
+            \OCP\Util::writeLog($this->appName, $this->l->t('Set share with guest'), 1);
             \OCP\Share::shareItem(
                 $itemType,
                 $itemSource,
@@ -221,6 +223,7 @@ class GuestController extends APIController
      */
     public function listGuests($itemType, $itemSource)
     {
+        \OCP\Util::writeLog($this->appName, $this->l->t('initialization guests list'), 1);
         try {
             $list = \OC\Share\Share::getItems(
                 $itemType,
@@ -229,6 +232,7 @@ class GuestController extends APIController
                 null,
                 $this->userId
             );
+            \OCP\Util::writeLog($this->appName, $this->l->t('Guests list retrieved'), 1);
         } catch(Exception $e) {
             $response = new JSONResponse();
             return array(
@@ -238,6 +242,7 @@ class GuestController extends APIController
                 ),
             );
         }
+        \OCP\Util::writeLog($this->appName, $this->l->t('formating guests list '), 1);
         $formated_list = array();
         try {
             foreach ($list as $key => $share) {
@@ -283,6 +288,7 @@ class GuestController extends APIController
 
     public function delete($uid, $itemType, $itemSource)
     {
+        \OCP\Util::writeLog($this->appName, $this->l->t('initialization delete guest'), 1);
         $params = array(
             'uid_guest' => $uid,
             'uid_sharer' => $this->userId,
@@ -324,6 +330,7 @@ class GuestController extends APIController
                 );
                 $this->guestMapper->updateGuest($uid, $data);
                 $params['guest_expiration'] = date('Y-m-d H:i:s', $date);
+                \OCP\Util::writeLog($this->appName, $this->l->t('Expiration date setted') . '(' . $date . ')', 1);
             }
         }
         catch(\Exception $e) {
@@ -427,6 +434,7 @@ class GuestController extends APIController
      */
     public function clean()
     {
+        \OCP\Util::writeLog($this->appName, $this->l->t('Initialization cleaning guest', 1);
         $this->userManager->removeListener('\OC\User', 'postDelete');
         $guests  = $this->guestMapper->getGuestsExpiration();
         if (empty($guests)) {
@@ -436,10 +444,10 @@ class GuestController extends APIController
             foreach ($guests as $guest) {
                 $delete = true;
                 \OC_Hook::emit('OCA\User_Share_Guest', 'pre_guestdelete', array('guest' => $guest, 'delete' => &$delete));
+                $uid = $guest->getUid();
                 if ($delete == false) {
                     continue;
                 }
-                $uid = $guest->getUid();
                 if (!$this->guestMapper->countSharers($uid)) {
                     \OC_User::deleteUser($uid);
                     $this->guestMapper->cleanGuest($guest->getUid());
@@ -467,6 +475,7 @@ class GuestController extends APIController
      */
     public function verifyInactive()
     {
+        \OCP\Util::writeLog($this->appName, $this->l->t('Initialization inactivity checking', 1);
         $guests  = $this->guestMapper->getGuests();
         if (empty($guests)) {
             return false;
@@ -545,6 +554,7 @@ class GuestController extends APIController
      */
     public function accept($uid, $password, $passwordconfirm)
     {
+        \OCP\Util::writeLog($this->appName, $this->l->t('Initialization password setting', 1);
         $error = '';
         if ($password !== $passwordconfirm) {
             $response = new JSONResponse();
@@ -556,6 +566,7 @@ class GuestController extends APIController
         if ($error === '') {
             \OC_User::setPassword($uid, $password);
             $this->guestMapper->updateGuest($uid, array('accepted' => 1, 'is_active' => 1));
+            \OCP\Util::writeLog($this->appName, $this->l->t('Guest\'s password setted', 1);
             \OC_User::login($uid, $password);
             \OC_Hook::emit('OCA\User_Share_Guest', 'post_guestsetp    margin: 0;assword', array('uid' => $uid, 'password' => $password));
             if (!GuestController::isAccountReseda($uid)) {
@@ -579,6 +590,7 @@ class GuestController extends APIController
 
     public function addDomain ($domain)
     {
+        \OCP\Util::writeLog($this->appName, $this->l->t('Initialization creation domain', 1);
         $appConfig = \OC::$server->getAppConfig();
         $domains_serialized = $appConfig->getValue('user_share_guest', 'user_share_guest_domains', '');
         $domains = unserialize($domains_serialized);
@@ -598,6 +610,7 @@ class GuestController extends APIController
 
     public function deleteDomain ($domain)
     {
+        \OCP\Util::writeLog($this->appName, $this->l->t('Initialization deletion domain', 1);
         $appConfig = \OC::$server->getAppConfig();
         $domains_serialized = $appConfig->getValue('user_share_guest', 'user_share_guest_domains', '');
         $domains = unserialize($domains_serialized);
@@ -634,6 +647,8 @@ class GuestController extends APIController
      */
     private function accountExist($uid)
     {
+        \OCP\Util::writeLog($this->appName, $this->l->t('verification of the existence of a user
+', 1);
         if($this->userManager->userExists($uid)) {
             return true;
         } elseif ($this::isAccountReseda($uid)) {
@@ -650,6 +665,8 @@ class GuestController extends APIController
      */
     public static function isAccountReseda($uid)
     {
+        \OCP\Util::writeLog($this->appName, $this->l->t('verification of the existence of a user in reseda
+', 1);
         $url = 'https://webservices.dsi.cnrs.fr/services/eairef/v1/users/v1/count.json?limit=1&query=' . json_encode([ 'mail' => $uid ]);
         $connect = 'mycore:4HR2jJAtUbH6xPYsnTXB';
         $curl = curl_init();
@@ -671,6 +688,7 @@ class GuestController extends APIController
      */
     private function initGuestDir($uid)
     {
+        \OCP\Util::writeLog($this->appName, $this->l->t('generation new guest directory', 1);
         $view = new \OC\Files\View('/' . $uid);
         if (!$view->is_dir('files')) {
             $view->mkdir('files');

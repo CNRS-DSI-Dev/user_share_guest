@@ -37,7 +37,6 @@ Class MailService
         $subject = (string)$this->l->t('A user of MyCore wish you invite and share files with you');
         $parameter = array('token' => $token, 'uid' => $uid);
 
-        //$url = $_SERVER['HTTP_HOST'] . $this->urlGenerator->linkToRoute('user_share_guest.page.confirm', $parameter);
         $url = $this->getLink('core.lost.resetform', $uid, $token);
 
         // generate the content

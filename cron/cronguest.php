@@ -6,7 +6,6 @@ use \OCA\User_Share_Guest\AppInfo\User_Share_Guest;
 class CronGuest {
 
     public static function verify() {
-        \OCP\Util::writeLog('test', 'coucou', 1);
         $app = new User_Share_Guest();
         $container = $app->getContainer();
         $container->query('GuestController')->verifyInactive();

@@ -28,8 +28,10 @@ $domains = $appConfig->getValue('user_share_guest', 'user_share_guest_domains', 
 
 // saving data
 if (!empty($_POST)) {
+    \OCP\Util::writeLog($c->query('AppName'), 'Changing app config', 1);
     if (isset($_POST['usershareguest-days']) && is_numeric(trim($_POST['usershareguest-days']))) {
         $appConfig->setValue('user_share_guest', 'user_share_guest_days', intval($_POST['usershareguest-days']));
+        \OCP\Util::writeLog($c->query('AppName'), 'Deletion\'s delay setted', 1);
         $days = trim($_POST['usershareguest-days']);
     } else {
         $error_days = $l->t('Input error, please enter a whole number.');
@@ -42,12 +44,16 @@ if (!empty($_POST)) {
     	$y = 2015;
     	if (checkdate($m, $d, $y)) {
     		$appConfig->setValue('user_share_guest', 'user_share_guest_stats', $_POST['usershareguest-stats']);
+            \OCP\Util::writeLog($c->query('AppName'), 'Statistics\'s date setted', 1);
 	        $stats = trim($_POST['usershareguest-stats']);
     	} else {
     		$error_stats = $l->t('Input error, please enter a correct date.');
     	}
     } else {
     	$error_stats = $l->t('Input error, please enter a correct date.');
+    }
+    if (empty($error_stats)) {
+        \OCP\Util::writeLog($c->query('AppName'), 'App config setted', 1);
     }
 }
 

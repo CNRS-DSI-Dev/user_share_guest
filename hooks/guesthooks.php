@@ -35,6 +35,7 @@ class GuestHooks {
     }
 
     public function postShared ($data) {
+        \OCP\Util::writeLog($this->appName, $this->l->t('hook post shared actived', 1);
         $uid = $data['shareWith'];
         $guest = $this->guestMapper->getGuests($uid);
         if (!empty($guest)) {

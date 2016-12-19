@@ -51,6 +51,7 @@ $data = $c->query('L10N')->t('Error : invalid mail.');
  * redirection if the current user is a guest
  */
 if ($guestMapper->getGuests($userId)) {
+
     $app_url = strstr($_SERVER['PHP_SELF'], '/apps/');
     if($app_url) {
         $app_url = substr($app_url, 6);
