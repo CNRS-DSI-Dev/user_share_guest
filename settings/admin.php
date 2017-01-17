@@ -28,6 +28,7 @@ $domains = $appConfig->getValue('user_share_guest', 'user_share_guest_domains', 
 
 // saving data
 if (!empty($_POST)) {
+    \OCP\Util::callCheck();
     \OCP\Util::writeLog($c->query('AppName'), 'Changing app config', 1);
     if (isset($_POST['usershareguest-days']) && is_numeric(trim($_POST['usershareguest-days']))) {
         $appConfig->setValue('user_share_guest', 'user_share_guest_days', intval($_POST['usershareguest-days']));
@@ -58,6 +59,7 @@ if (!empty($_POST)) {
 }
 
 $tmpl = new \OCP\Template($c->query('AppName'), 'settings-admin');
+$tmpl->assign('requesttoken', \OCP\Util::callRegister());
 $tmpl->assign('usershareguest-days', $days);
 $tmpl->assign('usershareguest-stats', $stats);
 $tmpl->assign('usershareguest-domains', $domains);

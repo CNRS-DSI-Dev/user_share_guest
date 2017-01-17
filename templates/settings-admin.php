@@ -11,6 +11,7 @@
 	        <input type="text" name="usershareguest-stats" id="usershareguestinputstat" value="<?php print_unescaped($_['usershareguest-stats']) ?>" placeholder="<?php print_unescaped($l->t('dd/mm')); ?>" />
             <span class='securitywarning'><?php print_unescaped($_['usershareguest-error-stats']); ?></span>
         </p>
+        <input type="hidden" name="requesttoken" value="<?php p($_['requesttoken']);?>" />
         <input type="submit" value="<?php print_unescaped($l->t('Save')); ?>"/>
     </form>
     <form id="usershareguest-form-domains">

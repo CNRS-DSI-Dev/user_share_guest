@@ -156,7 +156,7 @@ class GuestController extends APIController
                 $token = $guest->getToken();
             }
 
-            $this->config->setUserValue($params['uid_guest'], 'settings', 'email');
+            $this->config->setUserValue($params['uid_guest'], 'settings', 'email', $params['uid_guest']);
             $this->config->setUserValue(
                 $params['uid_guest'], 'owncloud', 'lostpassword', hash('sha256', $token)
             );
