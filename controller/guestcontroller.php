@@ -434,7 +434,7 @@ class GuestController extends APIController
      */
     public function clean()
     {
-        \OCP\Util::writeLog($this->appName, $this->l->t('Initialization cleaning guest', 1);
+        \OCP\Util::writeLog($this->appName, $this->l->t('Initialization cleaning guest', 1));
         $this->userManager->removeListener('\OC\User', 'postDelete');
         $guests  = $this->guestMapper->getGuestsExpiration();
         if (empty($guests)) {
@@ -475,7 +475,7 @@ class GuestController extends APIController
      */
     public function verifyInactive()
     {
-        \OCP\Util::writeLog($this->appName, $this->l->t('Initialization inactivity checking', 1);
+        \OCP\Util::writeLog($this->appName, $this->l->t('Initialization inactivity checking', 1));
         $guests  = $this->guestMapper->getGuests();
         if (empty($guests)) {
             return false;
@@ -554,7 +554,7 @@ class GuestController extends APIController
      */
     public function accept($uid, $password, $passwordconfirm)
     {
-        \OCP\Util::writeLog($this->appName, $this->l->t('Initialization password setting', 1);
+        \OCP\Util::writeLog($this->appName, $this->l->t('Initialization password setting', 1));
         $error = '';
         if ($password !== $passwordconfirm) {
             $response = new JSONResponse();
@@ -566,7 +566,7 @@ class GuestController extends APIController
         if ($error === '') {
             \OC_User::setPassword($uid, $password);
             $this->guestMapper->updateGuest($uid, array('accepted' => 1, 'is_active' => 1));
-            \OCP\Util::writeLog($this->appName, $this->l->t('Guest\'s password setted', 1);
+            \OCP\Util::writeLog($this->appName, $this->l->t('Guest\'s password setted', 1));
             \OC_User::login($uid, $password);
             \OC_Hook::emit('OCA\User_Share_Guest', 'post_guestsetp    margin: 0;assword', array('uid' => $uid, 'password' => $password));
             if (!GuestController::isAccountReseda($uid)) {
@@ -590,7 +590,7 @@ class GuestController extends APIController
 
     public function addDomain ($domain)
     {
-        \OCP\Util::writeLog($this->appName, $this->l->t('Initialization creation domain', 1);
+        \OCP\Util::writeLog($this->appName, $this->l->t('Initialization creation domain', 1));
         $appConfig = \OC::$server->getAppConfig();
         $domains_serialized = $appConfig->getValue('user_share_guest', 'user_share_guest_domains', '');
         $domains = unserialize($domains_serialized);
@@ -610,7 +610,7 @@ class GuestController extends APIController
 
     public function deleteDomain ($domain)
     {
-        \OCP\Util::writeLog($this->appName, $this->l->t('Initialization deletion domain', 1);
+        \OCP\Util::writeLog($this->appName, $this->l->t('Initialization deletion domain', 1));
         $appConfig = \OC::$server->getAppConfig();
         $domains_serialized = $appConfig->getValue('user_share_guest', 'user_share_guest_domains', '');
         $domains = unserialize($domains_serialized);
@@ -648,7 +648,7 @@ class GuestController extends APIController
     private function accountExist($uid)
     {
         \OCP\Util::writeLog($this->appName, $this->l->t('verification of the existence of a user
-', 1);
+', 1));
         if($this->userManager->userExists($uid)) {
             return true;
         } elseif ($this::isAccountReseda($uid)) {
@@ -665,8 +665,6 @@ class GuestController extends APIController
      */
     public static function isAccountReseda($uid)
     {
-        \OCP\Util::writeLog($this->appName, $this->l->t('verification of the existence of a user in reseda
-', 1);
         $url = 'https://webservices.dsi.cnrs.fr/services/eairef/v1/users/v1/count.json?limit=1&query=' . json_encode([ 'mail' => $uid ]);
         $connect = 'mycore:4HR2jJAtUbH6xPYsnTXB';
         $curl = curl_init();
@@ -688,7 +686,7 @@ class GuestController extends APIController
      */
     private function initGuestDir($uid)
     {
-        \OCP\Util::writeLog($this->appName, $this->l->t('generation new guest directory', 1);
+        \OCP\Util::writeLog($this->appName, $this->l->t('generation new guest directory', 1));
         $view = new \OC\Files\View('/' . $uid);
         if (!$view->is_dir('files')) {
             $view->mkdir('files');
