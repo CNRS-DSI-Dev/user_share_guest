@@ -62,6 +62,11 @@ $TRANSLATIONS  = array(
     'Input error, please enter a correct date.' => 'Erreur de saisie, veuillez entrer une date correcte.',
     'Input error, please enter a whole number.' => 'Erreur de saisie, veuillez renseigner un nombre entier.',
     'The domain to be deleted does not exist.' => 'Le domaine à supprimer n\'existe pas.',
-    'Domain already registered.' => 'Le domaine est déjà enregistré.'
+    'Domain already registered.' => 'Le domaine est déjà enregistré.',
 
+    'Generate and send statistics' => 'Générer et envoyer les statistiques',
+    'Launch account verification' => 'Lancer la vérification des comptes invités',
+    'Launch account cleaning' => 'Lancer le nettoyage des comptes invités',
+    'Confirm action ?' => 'Confirmer l\'action ?',
+    'Process done' => 'Processus terminé',
 );

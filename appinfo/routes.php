@@ -60,7 +60,22 @@ $application->registerRoutes($this, array(
         array(
             'name' => 'guest#delete_domain',
             'url' => '/deletedomain',
-            'verb' => 'get',
+            'verb' => 'GET',
+        ),
+        array(
+            'name' => 'guest#launch_verif',
+            'url' => '/verifclean',
+            'verb' => 'GET',
+        ),
+        array(
+            'name' => 'guest#launch_clean',
+            'url' => '/verifclean',
+            'verb' => 'GET',
+        ),
+        array(
+            'name' => 'guest#launch_stat',
+            'url' => '/stat',
+            'verb' => 'GET',
         ),
         // PAGE CONTROLLER
         array(

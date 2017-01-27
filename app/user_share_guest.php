@@ -70,9 +70,11 @@ class User_Share_Guest extends App {
 
         $container->registerService('GuestHooks', function($c){
             return new GuestHooks(
+                $c->query('AppName'),
                 $c->query('GuestMapper'),
                 $c->query('UserManager'),
-                $c->query('Session')
+                $c->query('Session'),
+                $c->query('L10N')
             );
         });
 

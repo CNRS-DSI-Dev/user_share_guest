@@ -17,6 +17,8 @@ use OCA\User_Share_Guest\App\User_Share_Guest;
 
 $app = new User_Share_Guest;
 $c = $app->getContainer();
+$urlGenerator = $c->query('ServerContainer')->getURLGenerator();
+
 
 $appConfig = \OC::$server->getAppConfig();
 $l = $app->getContainer()->query('L10N');
@@ -65,6 +67,15 @@ $tmpl->assign('usershareguest-stats', $stats);
 $tmpl->assign('usershareguest-domains', $domains);
 $tmpl->assign('usershareguest-error-days', $error_days);
 $tmpl->assign('usershareguest-error-stats', $error_stats);
+
+
+$url_stat = $urlGenerator->linkToRoute('user_share_guest.guest.launch_stat');
+$url_verif = $urlGenerator->linkToRoute('user_share_guest.guest.launch_verif');
+$url_clean = $urlGenerator->linkToRoute('user_share_guest.guest.launch_clean');
+
+$tmpl->assign('usershareguest-link-stat', $url_stat);
+$tmpl->assign('usershareguest-link-verif', $url_verif);
+$tmpl->assign('usershareguest-link-clean', $url_clean);
 
 
 return $tmpl->fetchPage();

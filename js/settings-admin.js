@@ -44,4 +44,20 @@ $(document).ready(function() {
             }
         });
 	});
+    $(document).on('click', '#usershareguest button', function(e) {
+        e.preventDefault();
+        var link = $(this).data('link');
+        var choice = confirm(t('user_share_guest', 'Confirm action ?'));
+        if (choice == true) {
+            $.ajax({
+                type: 'GET',
+                url: link,
+                dataType: 'json',
+                async: false,
+                success: function(resp) {
+                    alert(t('user_share_guest', 'Process done'));
+                }
+            });
+        }
+    });
 });

@@ -35,4 +35,5 @@
                 ?>
             </ul>
     </form>
+    <p><button data-link="<?php echo $_['usershareguest-link-stat']?>"><?php print_unescaped($l->t('Generate and send statistics')); ?></button><button data-link="<?php echo $_['usershareguest-link-verif']?>"><?php print_unescaped($l->t('Launch account verification')); ?></button><button data-link="<?php echo $_['usershareguest-link-clean']?>"><?php print_unescaped($l->t('Launch account cleaning')); ?></button></p>
 </div>
