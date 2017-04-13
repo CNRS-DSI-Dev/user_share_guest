@@ -30,7 +30,6 @@ $TRANSLATIONS  = array(
     'Set your password' => 'Renseignez votre mot passe',
     'Confirm your password' => 'Confirmez votre mot de passe',
     'Set your password to confirm the creation of your account' => 'Renseignez votre mot de passe afin de confirmer la création de votre compte',
-    'Validate', 'Valider',
     'Passwords are different, please check your entry' => 'Les mots de passe sont différents, veuillez vérifier votre saisie',
     'Your password is not enough secure' => 'Votre mot de passe n\'est pas assez sécurisé',
     'Log out' => 'Se déconnecter',
