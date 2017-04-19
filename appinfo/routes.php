@@ -77,11 +77,6 @@ $application->registerRoutes($this, array(
             'url' => '/stat',
             'verb' => 'GET',
         ),
-         array(
-            'name' => 'guest#test',
-            'url' => '/test',
-            'verb' => 'GET',
-        ),
         // PAGE CONTROLLER
         array(
             'name' => 'page#confirm',

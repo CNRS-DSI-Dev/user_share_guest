@@ -26,8 +26,7 @@ $(document).ready(function() {
         html += '<input type="submit" name="guestSubmit" id="guestSubmit" value="' + t('user_share_guest', 'Guest submit') + '"/>';
         html += '</form>';
         html += '<ul id="guestList">';
-        html += '</ul>';
-        html += '</div>';
+
         /*
         for (var i = 0; i < data.length; i++) {
             var guest = data[i];
@@ -42,8 +41,10 @@ $(document).ready(function() {
         html += '</ul>';
         html += '</div>';
         $('#dropdown').append(html);
+        /*if (data.length > 0) {
+            $('#dropdown #guestCheckbox').trigger('click');
+        }*/
 
-        // partie quand on rempli le champ de base
         $('#shareWith').autocomplete({source: function(search, response) {
                 var $loading = $('#dropdown .shareWithLoading');
                 $loading.removeClass('hidden');
@@ -183,6 +184,7 @@ $(document).ready(function() {
 
     function launchCreateGuest() {
         var data = $('#guestInput').val();
+
         OC.Share.createShareGuest(data, itemType, itemSource, itemSourceName);
     }
 

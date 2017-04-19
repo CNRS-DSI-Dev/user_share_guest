@@ -25,12 +25,11 @@ class User_Share_Guest extends App {
         parent::__construct('user_share_guest', $urlParams);
 
         $container = $this->getContainer();
-        $server = $container->getServer();
 
         /**
          * Controllers
          */
-        $container->registerService('GuestController', function($c)  use ($server){
+        $container->registerService('GuestController', function($c){
             return new GuestController(
                 $c->query('AppName'),
                 $c->query('Request'),
@@ -39,8 +38,7 @@ class User_Share_Guest extends App {
                 $c->query('UserId'),
                 $c->query('UserManager'),
                 $c->query('MailService'),
-                $server->getConfig(),
-                $server->getShareManager()
+                $c->query('Config')
             );
         });
 

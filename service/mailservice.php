@@ -59,7 +59,7 @@ Class MailService
 
         //sending
         try {
-            \OCP\Util::sendMail($toAddress, $toName, $subject, $altMail, $fromAddress, $fromName, 1, $htmlMail);
+            \OCP\Util::sendMail($toAddress, $toName, $subject, $htmlMail, $fromAddress, $fromName, 1, $altMail);
         } catch (\Exception $e) {
             \OCP\Util::writeLog($this->appName, 'Can\t send mail for guest\'s invitation : ' . $e->getMessage(), \OCP\Util::ERROR);
         }
@@ -87,7 +87,7 @@ Class MailService
 
         //sending
         try {
-            \OCP\Util::sendMail($toAddress, $toName, $subject, $altMail, $fromAddress, $fromName, 1, $htmlMail);
+            \OCP\Util::sendMail($toAddress, $toName, $subject, $htmlMail, $fromAddress, $fromName, 1, $altMail);
         } catch (\Exception $e) {
             \OCP\Util::writeLog($this->appName, 'Can\'t send mail for guest\'s deletion : ' . $e->getMessage(), \OCP\Util::ERROR);
         }
@@ -117,7 +117,7 @@ Class MailService
 
         //sending
         try {
-            \OCP\Util::sendMail($toAddress, $toName, $subject, $altMail, $fromAddress, $fromName, 1, $htmlMail);
+            \OCP\Util::sendMail($toAddress, $toName, $subject, $htmlMail, $fromAddress, $fromName, 1, $altMail);
         } catch (\Exception $e) {
             \OCP\Util::writeLog($this->appName, 'Can\'t send mail for guest\'s deletion : ' . $e->getMessage(), \OCP\Util::ERROR);
         }
@@ -125,7 +125,6 @@ Class MailService
 
     public function sendMailGuestStatistics($mail, $data) {
 
-        //$mail = 'victor.bordage-gorry@globalis-ms.com';
         // Mail part
         $theme = new \OC_Defaults;
         $subject = (string)$this->l->t('Mycore - Guests accounts created statistics');

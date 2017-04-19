@@ -2,6 +2,9 @@
  File's template
  */
 
+#guest label {
+    padding-left: 8px;
+}
 
 #guestForm, #guestList {
     display: none;
@@ -29,7 +32,7 @@
 }
 
 #guestForm .icon-loading-small {
-    display: inline-block;
+    display: inline-block !important;
     padding-left: 10px;
 }
 

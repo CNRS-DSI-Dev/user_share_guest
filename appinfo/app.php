@@ -24,15 +24,8 @@ $c->query('GuestHooks')->register();
 /**
  *  register personnal scripts
  */
-$eventDispatcher = \OC::$server->getEventDispatcher();
-$eventDispatcher->addListener('OCA\Files::loadAdditionalScripts', function() use ($c){
-    \OCP\Util::addscript($c->query('AppName'), 'app');
-    \OCP\Util::addscript($c->query('AppName'), 'usershareguestview');
-    \OCP\Util::addscript($c->query('AppName'), 'sharedialogview-surcharged');
-    //\OCP\Util::addscript($c->query('AppName'), 'usershareguesttabview');
-    \OCP\Util::addscript($c->query('AppName'), 'filesplugin');
-    \OCP\Util::addStyle($c->query('AppName'), 'style');
-});
+\OCP\Util::addStyle('user_share_guest','style');
+\OCP\Util::addScript('user_share_guest','script');
 
 /**
  * register cron
@@ -52,6 +45,7 @@ $guestMapper = $c->query('GuestMapper');
 $data = $c->query('L10N')->t('Error : invalid mail.');
 
 // déconnection si plus de partage
+
 
 /**
  * redirection if the current user is a guest
