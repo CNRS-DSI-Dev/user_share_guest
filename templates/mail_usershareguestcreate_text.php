@@ -12,6 +12,8 @@
     p($l->t('Hello,'));
     p($l->t('The user %s wish you invite and share files with you on MyCore.', array($_['sharerUid'])));
     p($l->t('Accept the invitation : ')) . ' ' . $_['accountUrl'];
+	p($l->t('Your login is the e-mail address by which you have been contacted'));
+    
 ?>
 
 

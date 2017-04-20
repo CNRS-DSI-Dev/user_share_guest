@@ -2,16 +2,11 @@
     <h2><?php p($l->t('Share to a guest')); ?></h2>
     <form id="usershareguest-form" method="POST">
         <p>
-	        <label for="usershareguestinputday"><?php p($l->t('Number of days before the deletion of a guest account when it no longer connected sharing : '));?></label>
+	        <label for="usershareguestinputday"><?php p($l->t('Number of days of inactivity allowed : '));?></label>
 	        <input type="text" name="usershareguest-days" id="usershareguestinputday" value="<?php print_unescaped($_['usershareguest-days']) ?>" />
 	    </p>
-	    <p>
-	        <label for="usershareguestinputstat"><?php p($l->t('Statistics sending date : '));?></label>
-	        <input type="text" name="usershareguest-stats" id="usershareguestinputstat" value="<?php print_unescaped($_['usershareguest-stats']) ?>" placeholder="<?php print_unescaped($l->t('dd/mm')); ?>" />
-        </p>
         <input type="hidden" name="requesttoken" value="<?php p($_['requesttoken']);?>" />
         <input type="submit" value="<?php print_unescaped($l->t('Save')); ?>"/>
-        <span class='securitywarning'><?php print_unescaped($_['usershareguest-error-stats']); ?></span>
     </form>
     <form id="usershareguest-form-domains">
         <p>
@@ -80,7 +75,3 @@
         ?>
     </div>
 </div>
-
-<?php  
-//var_dump($_);exit(); 
-?>

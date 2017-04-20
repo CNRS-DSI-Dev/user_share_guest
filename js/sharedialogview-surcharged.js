@@ -1,7 +1,4 @@
-/*
-    Surcharge de méthode du coeur js
-    /!\ voir avec esteban pour l'astuce du old
- */
+
 (function() {
 
     // surchage pour afficher correctement le formulaire d'ajout d'invité
@@ -131,19 +128,4 @@
             return this;
         }
     }
-    
-    /*var old_ShareDialogShareeListView_template = OC.Share.ShareDialogShareeListView.prototype.template;
-    if (old_ShareDialogShareeListView_template) {
-        OC.Share.ShareDialogShareeListView.prototype.template = function(data) {
-            if (!this._template) {
-                this._template = Handlebars.compile(TEMPLATE);
-            }
-            return this._template(data);
-        }
-    }*/
-
-    
-
-    // surcharge pour l'affichage du listing des user auxquels le fichier a été partagé
-
 })();

@@ -17,6 +17,7 @@ $TRANSLATIONS  = array(
     'The user %s wish you invite and share files with you on MyCore.' => 'l\'utilsateur %s souhaite vous inviter et partager des fichiers avec vous sur MyCore.',
     'Accept the invitation.' => 'Accepter l\'invitation.',
     'Accept the invitation: ' => 'Accepter l\'invitation : ',
+    'Your login is the e-mail address by which you have been contacted' => 'Votre identifiant de connexion est l\'adresse mail par laquelle vous avez été contacté(e)',
     'Your guest account has been deleted.' => 'Votre compte invité a été supprimé.',
     'No more sharing on Mycore is connected to your guest account, the account has therefore been deleted.' => 'Plus aucun partage sur Mycore n\'est relié à votre compte invité, ce dernier a donc été supprimé.',
     'Mycore - Guests accounts created statistics' => 'Mycore - Statistiques des comptes invités créés',
@@ -54,7 +55,8 @@ $TRANSLATIONS  = array(
 
     // Admin setting
     'Share to a guest' => 'Partage à un invité',
-    'Number of days before the deletion of a guest account when it no longer connected sharing : ' => 'Nombre de jours avant la suppression d\'un compte invité lorsqu\'il n\'a plus de partage relié : ',
+    'Number of days of inactivity allowed : ' => 'Nombre de jour d\'inactivité autorisé : ',
+    'Save' => 'Sauvegarder',
     'Statistics sending date : ' => 'Date d\'envoi des statistiques : ',
     'Specific domain allowed : ' => 'Domaine spécifique accepté  : ',
     'dd/mm' => 'jj/mm',

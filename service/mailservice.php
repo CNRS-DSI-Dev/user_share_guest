@@ -32,7 +32,6 @@ Class MailService
 
     public function sendMailGuestCreate($uid, $token) {
         
-        //$uid = 'victor.bordage-gorry@globalis-ms.com';
         // Mail part
         $theme = new \OC_Defaults;
         $subject = (string)$this->l->t('A user of MyCore wish you invite and share files with you');
@@ -68,7 +67,6 @@ Class MailService
 
     public function sendMailGuestDelete($uid) {
         
-        //$uid = 'victor.bordage-gorry@globalis-ms.com';
         // Mail part
         $theme = new \OC_Defaults;
         $subject = (string)$this->l->t('Your guest account has been deleted');
@@ -96,7 +94,7 @@ Class MailService
     }
 
     public function sendMailGuestInactive($uid, $date) {
-        //$uid = 'victor.bordage-gorry@globalis-ms.com';
+
         // Mail part
         $theme = new \OC_Defaults;
         $subject = (string)$this->l->t('Your guest account on Mycore is inactive');
@@ -127,7 +125,6 @@ Class MailService
 
     public function sendMailGuestStatistics($mail, $data) {
 
-        //$mail = 'victor.bordage-gorry@globalis-ms.com';
         // Mail part
         $theme = new \OC_Defaults;
         $subject = (string)$this->l->t('Mycore - Guests accounts created statistics');

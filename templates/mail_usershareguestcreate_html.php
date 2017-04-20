@@ -29,6 +29,7 @@
                         <p><?php p($l->t('Hello,')); ?></p>
                         <p><?php p($l->t('The user %s wish you invite and share files with you on MyCore.', array($_['sharerUid'])));?></p>
                         <p><a href="<?php echo $_['accountUrl']; ?>"><?php p($l->t('Accept the invitation.'));?></a></p>
+                        <p><?php p($l->t('Your login is the e-mail address by which you have been contacted')); ?></p>
                     </td>
                 </tr>
                 <tr>

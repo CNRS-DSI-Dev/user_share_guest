@@ -25,7 +25,7 @@ $c->query('GuestHooks')->register($app->getUserSession());
  *  register personnal scripts
  */
 $eventDispatcher = \OC::$server->getEventDispatcher();
-$eventDispatcher->addListener('OCA\Files::loadAdditionalScripts', function() use ($c){
+$eventDispatcher->addListener('OCA\Files::loadAdditionalScripts', function() use ($c) {
     \OCP\Util::addscript($c->query('AppName'), 'template');
     \OCP\Util::addscript($c->query('AppName'), 'usershareguestview');
     \OCP\Util::addscript($c->query('AppName'), 'sharedialogview-surcharged');
@@ -33,16 +33,6 @@ $eventDispatcher->addListener('OCA\Files::loadAdditionalScripts', function() use
     \OCP\Util::addStyle($c->query('AppName'), 'style');
 });
 
-/**
- * register cron
- */
-/*
-\OCP\Backgroundjob::addRegularTask('\OCA\User_Share_Guest\Cron\GuestCron', 'verify');
-\OCP\Backgroundjob::addRegularTask('\OCA\User_Share_Guest\Cron\GuestCron', 'statitstics');
-*/
-/**
- * register settings
- */
 \OCP\App::registerAdmin($c->query('AppName'), 'settings/admin');
 
 $userId = $c->query('UserId');

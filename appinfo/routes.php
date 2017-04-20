@@ -69,22 +69,17 @@ $application->registerRoutes($this, array(
         ),
         array(
             'name' => 'guest#launch_verif',
-            'url' => '/verifclean',
+            'url' => '/verif',
             'verb' => 'GET',
         ),
         array(
             'name' => 'guest#launch_clean',
-            'url' => '/verifclean',
+            'url' => '/clean',
             'verb' => 'GET',
         ),
         array(
             'name' => 'guest#launch_stat',
             'url' => '/stat',
-            'verb' => 'GET',
-        ), // ### A DELETE !!!
-         array(
-            'name' => 'guest#test',
-            'url' => '/test',
             'verb' => 'GET',
         ),
     ),

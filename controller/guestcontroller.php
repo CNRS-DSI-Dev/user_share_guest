@@ -331,7 +331,7 @@ class GuestController extends ApiController
                 );
                 $this->guestMapper->updateGuest($uid, $data);
                 $params['guest_expiration'] = date('Y-m-d H:i:s', $date);
-                \OCP\Util::writeLog($this->appName, $this->l->t('Expiration date setted') . '(' . $date . ')', 1);
+                \OCP\Util::writeLog($this->appName, $this->l->t('Expiration date set') . '(' . $date . ')', 1);
             }
         }
         catch(\Exception $e) {
@@ -439,9 +439,10 @@ class GuestController extends ApiController
                 if ($delete == false) {
                     continue;
                 }
-                if (!$this->guestMapper->countSharers($uid)) {
-                    \OC_User::deleteUser($uid);
-                    $this->guestMapper->cleanGuest($guest->getUid());
+                $user = $this->userManager->get($uid);
+                if (!$this->guestMapper->countSharesToGuest($uid)) {
+                    $user->delete();
+                    $this->guestMapper->deleteGuest($uid);
                     \OCP\Util::writeLog($this->appName, $this->l->t('Guest account deleted : ') . $guest->getUid(), 1);
                     $this->mailService->sendMailGuestDelete($uid);
                     \OC_Hook::emit('OCA\User_Share_Guest', 'post_guestdelete', array('guest' => $guest));
@@ -480,16 +481,15 @@ class GuestController extends ApiController
                 }
                 $user = $this->userManager->get($guest->getUid());
 
-                if ($guest->getIsActive() && $user) {
+                if ($guest->getIsActive() && $user && $user->getLastLogin()) {
                     $interval = time() - $user->getLastLogin();
                 } else {
                     $interval = time() - strtotime($guest->getDateCreation());
                 }
 
                 $limit_days = $appconfig->getValue('user_share_guest', 'user_share_guest_days', '30'); // inactive for a month (default)
-                
                 if ($interval / (60*60*24) >= $limit_days) { 
-                    $date = mktime(00, 00, 00, date('m') + 3, date('d'), date('Y'));
+                    $date = mktime(00, 00, 00, date('m') + 1, date('d'), date('Y')); // 1 mois de délai avant la suppression du compte
                     $this->guestMapper->updateGuest($guest->getUid(), array('date_expiration' => date('Y-m-d H:i:s', $date)));
                     $this->mailService->sendMailGuestInactive($guest->getUid(), date('d/m/Y', $date));
                 }
@@ -527,7 +527,6 @@ class GuestController extends ApiController
                     \OCP\Util::writeLog($this->appName, $this->l->t(sprintf('Statistics generation : %s haven\'t email adress.', $uid_sharer)), 3);
                     continue;
                 }
-                //$item = \OC\Share\Share::getItems($share['item_type'], $share['item_source'], null, $share['uid_guest'], $share['uid_sharer'], -1, null, 1);
                 $user = $this->userManager->get($uid_guest);
 
                 if ($user->getLastLogin()) {
@@ -570,7 +569,7 @@ class GuestController extends ApiController
         if ($error === '') {
             \OC_User::setPassword($uid, $password);
             $this->guestMapper->updateGuest($uid, array('accepted' => 1, 'is_active' => 1));
-            \OCP\Util::writeLog($this->appName, $this->l->t('Guest\'s password setted', 1));
+            \OCP\Util::writeLog($this->appName, $this->l->t('Guest\'s password set', 1));
             \OC_User::login($uid, $password);
             \OC_Hook::emit('OCA\User_Share_Guest', 'post_guestsetp    margin: 0;assword', array('uid' => $uid, 'password' => $password));
             if (!GuestController::isAccountReseda($uid)) {
@@ -590,7 +589,6 @@ class GuestController extends ApiController
             'status' => 'success'
         );
     }
-
 
     public function addDomain ($domain)
     {
@@ -714,7 +712,7 @@ class GuestController extends ApiController
      * 
      * @throws \Exception
      */
-    public function saveAdmin ($days, $stat_day) {
+    public function saveAdmin($days, $stat_day) {
 
         \OCP\Util::writeLog($this->appName, 'Changing app config', 1);
         $appConfig = \OC::$server->getAppConfig();
@@ -724,7 +722,7 @@ class GuestController extends ApiController
 
         if (isset($days) && is_numeric($days) && $days > 0) {
             $appConfig->setValue('user_share_guest', 'user_share_guest_days', intval(trim($days)));
-            \OCP\Util::writeLog($this->appName, 'Deletion\'s delay setted', 1);
+            \OCP\Util::writeLog($this->appName, 'Deletion\'s delay set', 1);
         } else {
             $error[] = $this->l->t('Please enter a positve integer for the inactive period');
         }
@@ -736,7 +734,7 @@ class GuestController extends ApiController
             $y = date('Y');
             if (checkdate($m, $d, $y)) {
                 $appConfig->setValue('user_share_guest', 'user_share_guest_stats', $stat_day);
-                \OCP\Util::writeLog($this->appName, 'Statistics\'s date setted', 1);
+                \OCP\Util::writeLog($this->appName, 'Statistics\'s date set', 1);
             } else {
                 $error[]= $this->l->t('Please enter a correct date');
             }
@@ -746,7 +744,7 @@ class GuestController extends ApiController
 
         $response = new JSONResponse();
         if (empty($error)) {
-            \OCP\Util::writeLog($this->appName, 'App config setted', 1);
+            \OCP\Util::writeLog($this->appName, 'App config set', 1);
             return array(
                 'status' => 'succes',
             );
@@ -792,29 +790,5 @@ class GuestController extends ApiController
         $this->clean();
         $appConfig = \OC::$server->getAppConfig();
         $appConfig->setValue('user_share_guest', 'user_share_guest_last_clean', time());
-    }
-
-    /**
-     * launch guest's account statistics
-     *
-     * @NoAdminRequired
-     * @publicPage
-     * @NoCSRFRequired
-     * 
-     * @throws \Exception
-     */
-    public function test () {
-
-        /*$this->generateStatistics();
-        echo "stat done <br />";
-        
-        $this->verifyInactive();
-        echo "inactive done <br />";
-        
-        /*$this->clean();
-        echo "clean done <br />";*/
-
-        /*echo "fin";
-        exit();*/
     }
 }

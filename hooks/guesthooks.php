@@ -74,9 +74,6 @@ class GuestHooks {
 
     public function postDeleteUser($user) {
         $uid = $user->getUid();
-        \OCP\Util::writeLog($this->appName, $this->l->t('coucou je suis le post user delete - ' . $user . ' - ' . $uid), 1);
-
-        $uid = $user->getUid();
         $guest = $this->guestMapper->getGuests($uid);
         if ($guest) {
             $this->guestMapper->deleteGuest($uid);
