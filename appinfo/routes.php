@@ -53,6 +53,11 @@ $application->registerRoutes($this, array(
             'verb' => 'POST',
         ),
         array(
+            'name' => 'guest#save_admin',
+            'url' => '/saveadmin',
+            'verb' => 'POST',
+        ),
+        array(
             'name' => 'guest#add_domain',
             'url' => '/adddomain',
             'verb' => 'POST',
@@ -76,22 +81,11 @@ $application->registerRoutes($this, array(
             'name' => 'guest#launch_stat',
             'url' => '/stat',
             'verb' => 'GET',
-        ),
-        // PAGE CONTROLLER
-        array(
-            'name' => 'page#confirm',
-            'url' => '/confirm/{uid}/{token}',
-            'verb' => 'GET'
-        ),
-        array(
-            'name' => 'page#accept',
-            'url' => '/confirm/{uid}/{token}',
-            'verb' => 'POST'
-        ),
-        array(
-            'name' => 'page#share_list',
-            'url' => '/share_list',
-            'verb' => 'GET'
+        ), // ### A DELETE !!!
+         array(
+            'name' => 'guest#test',
+            'url' => '/test',
+            'verb' => 'GET',
         ),
     ),
 ));

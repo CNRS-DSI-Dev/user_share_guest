@@ -2,9 +2,6 @@
  File's template
  */
 
-#guest label {
-    padding-left: 8px;
-}
 
 #guestForm, #guestList {
     display: none;
@@ -32,7 +29,7 @@
 }
 
 #guestForm .icon-loading-small {
-    display: inline-block !important;
+    display: inline-block;
     padding-left: 10px;
 }
 
@@ -130,4 +127,14 @@
 
 .app-user_share_guest table.multiselect thead {
     left: 0;
+}
+
+/* Admin */
+#usershareguest-form-domains {
+    margin-bottom: 15px;
+}
+
+.admin-guest-action {
+    display: inline-block;
+    vertical-align: top;
 }

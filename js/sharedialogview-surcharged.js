@@ -3,132 +3,144 @@
     /!\ voir avec esteban pour l'astuce du old
  */
 (function() {
-    var TEMPLATE_SHAREDIALOGVIEW_RENDER_SURCHARGE =
-        '<div class="resharerInfoView subView"></div>' +
-        '{{#if isSharingAllowed}}' +
-        '<label for="shareWith-{{cid}}" class="hidden-visually">{{shareLabel}}</label>' +
-        '<div class="oneline">' +
-        '    <input id="shareWith-{{cid}}" class="shareWithField" type="text" placeholder="{{sharePlaceholder}}" />' +
-        '    <span class="shareWithLoading icon-loading-small hidden"></span>'+
-        '{{{remoteShareInfo}}}' +
-        '</div>' +
-        '{{/if}}' +
-        '<div class="shareeListView subView"></div>' +
-        '<div class="linkShareView subView"></div>' +
-        '<div class="expirationView subView"></div>' +
-        '<div class="mailView subView"></div>' +
-        '<div class="socialView subView"></div>' +
-        '<div class="guestShareView subView"></div>' + // partie du template modifiée
-        '<div class="loading hidden" style="height: 50px"></div>';
-
 
     // surchage pour afficher correctement le formulaire d'ajout d'invité
     
-    var old_initialize = OC.Share.ShareDialogView.prototype.initialize;
+    var old_ShareDialogView_initialize = OC.Share.ShareDialogView.prototype.initialize;
+    if (old_ShareDialogView_initialize) {
+        OC.Share.ShareDialogView.prototype.initialize = function(options) {
+            var view = this;
+            this.model.on('fetchError', function() {
+                OC.Notification.showTemporary(t('core', 'Share details could not be loaded for this item.'));
+            });
 
-    OC.Share.ShareDialogView.prototype.initialize = function(options) {
-        var view = this;
-        this.model.on('fetchError', function() {
-            OC.Notification.showTemporary(t('core', 'Share details could not be loaded for this item.'));
-        });
+            if(!_.isUndefined(options.configModel)) {
+                this.configModel = options.configModel;
+            } else {
+                throw 'missing OC.Share.ShareConfigModel';
+            }
 
-        if(!_.isUndefined(options.configModel)) {
-            this.configModel = options.configModel;
-        } else {
-            throw 'missing OC.Share.ShareConfigModel';
+            this.configModel.on('change:isRemoteShareAllowed', function() {
+                view.render();
+            });
+            this.model.on('change:permissions', function() {
+                view.render();
+            });
+
+            this.model.on('request', this._onRequest, this);
+            this.model.on('sync', this._onEndRequest, this);
+
+            var subViewOptions = {
+                model: this.model,
+                configModel: this.configModel
+            };
+
+            var subViews = {
+                resharerInfoView: 'ShareDialogResharerInfoView',
+                linkShareView: 'ShareDialogLinkShareView',
+                expirationView: 'ShareDialogExpirationView',
+                shareeListView: 'ShareDialogShareeListView',
+                mailView: 'ShareDialogMailView',
+                socialView: 'ShareDialogLinkSocialView',
+                guestView : 'UserShareGuestView' // surcharge a cet endroit
+            };
+            this.existing_class = {};
+            for(var name in subViews) {
+                var className = subViews[name];
+                if (_.isUndefined(options[name]) && OC.Share[className]) {
+                    this[name] = new OC.Share[className](subViewOptions)
+                    this.existing_class[name] = 1;
+                } else {
+                    this[name] = options[name];
+                }
+            }
+
+            _.bindAll(this,
+                'autocompleteHandler',
+                '_onSelectRecipient',
+                'onShareWithFieldChanged'
+            );
         }
-
-        this.configModel.on('change:isRemoteShareAllowed', function() {
-            view.render();
-        });
-        this.model.on('change:permissions', function() {
-            view.render();
-        });
-
-        this.model.on('request', this._onRequest, this);
-        this.model.on('sync', this._onEndRequest, this);
-
-        var subViewOptions = {
-            model: this.model,
-            configModel: this.configModel
-        };
-
-        var subViews = {
-            resharerInfoView: 'ShareDialogResharerInfoView',
-            linkShareView: 'ShareDialogLinkShareView',
-            expirationView: 'ShareDialogExpirationView',
-            shareeListView: 'ShareDialogShareeListView',
-            mailView: 'ShareDialogMailView',
-            socialView: 'ShareDialogLinkSocialView',
-            guestView : 'UserShareGuestView' // surcharge a cet endroit
-        };
-        for(var name in subViews) {
-            var className = subViews[name];
-            this[name] = _.isUndefined(options[name])
-                ? new OC.Share[className](subViewOptions)
-                : options[name];
-        }
-
-        _.bindAll(this,
-            'autocompleteHandler',
-            '_onSelectRecipient',
-            'onShareWithFieldChanged'
-        );
     }
 
-    var old_render = OC.Share.ShareDialogView.prototype.render;
+    var old_ShareDialogView_render = OC.Share.ShareDialogView.prototype.render;
+    if (old_ShareDialogView_render) {
+        OC.Share.ShareDialogView.prototype.render = function() {
+            var baseTemplate = this._getTemplate('base', TEMPLATE_SHAREDIALOGVIEW_RENDER_SURCHARGE);
 
-    OC.Share.ShareDialogView.prototype.render = function() {
-        var baseTemplate = this._getTemplate('base', TEMPLATE_SHAREDIALOGVIEW_RENDER_SURCHARGE);
+            this.$el.html(baseTemplate({
+                cid: this.cid,
+                shareLabel: t('core', 'Share'),
+                sharePlaceholder: this._renderSharePlaceholderPart(),
+                remoteShareInfo: this._renderRemoteShareInfoPart(),
+                isSharingAllowed: this.model.sharePermissionPossible()
+            }));
 
-        this.$el.html(baseTemplate({
-            cid: this.cid,
-            shareLabel: t('core', 'Share'),
-            sharePlaceholder: this._renderSharePlaceholderPart(),
-            remoteShareInfo: this._renderRemoteShareInfoPart(),
-            isSharingAllowed: this.model.sharePermissionPossible()
-        }));
+            var $shareField = this.$el.find('.shareWithField');
+            if ($shareField.length) {
+                $shareField.autocomplete({
+                    minLength: 1,
+                    delay: 750,
+                    focus: function(event) {
+                        event.preventDefault();
+                    },
+                    source: this.autocompleteHandler,
+                    select: this._onSelectRecipient
+                }).data('ui-autocomplete')._renderItem = this.autocompleteRenderItem;
+            }
 
-        var $shareField = this.$el.find('.shareWithField');
-        if ($shareField.length) {
-            $shareField.autocomplete({
-                minLength: 1,
-                delay: 750,
-                focus: function(event) {
-                    event.preventDefault();
-                },
-                source: this.autocompleteHandler,
-                select: this._onSelectRecipient
-            }).data('ui-autocomplete')._renderItem = this.autocompleteRenderItem;
+            /* début surcharge */
+            if (this.existing_class.resharerInfoView != undefined) {
+                this.resharerInfoView.$el = this.$el.find('.resharerInfoView');
+                this.resharerInfoView.render();    
+            }
+            
+            if (this.existing_class.resharerInfoView != undefined) {
+                this.linkShareView.$el = this.$el.find('.linkShareView');
+                this.linkShareView.render();
+            }
+
+            if (this.existing_class.expirationView != undefined) {
+                this.expirationView.$el = this.$el.find('.expirationView');
+                this.expirationView.render();
+            }
+
+            if (this.existing_class.shareeListView != undefined) {
+                this.shareeListView.$el = this.$el.find('.shareeListView');
+                this.shareeListView.render();  
+            }
+
+            if (this.existing_class.mailView != undefined) {
+                this.mailView.$el = this.$el.find('.mailView');
+                this.mailView.render();   
+            }
+
+            if (this.existing_class.socialView != undefined) {
+                this.socialView.$el = this.$el.find('.socialView');
+                this.socialView.render();  
+            }
+
+            if (this.existing_class.guestView != undefined) {
+                this.guestView.$el = this.$el.find('.guestShareView');
+                this.guestView.render();
+            }
+            /* fin surcharge */
+
+            this.$el.find('.hasTooltip').tooltip();
+
+            return this;
         }
-
-        this.resharerInfoView.$el = this.$el.find('.resharerInfoView');
-        this.resharerInfoView.render();
-
-        this.linkShareView.$el = this.$el.find('.linkShareView');
-        this.linkShareView.render();
-
-        this.expirationView.$el = this.$el.find('.expirationView');
-        this.expirationView.render();
-
-        this.shareeListView.$el = this.$el.find('.shareeListView');
-        this.shareeListView.render();
-
-        this.mailView.$el = this.$el.find('.mailView');
-        this.mailView.render();
-
-        this.socialView.$el = this.$el.find('.socialView');
-        this.socialView.render();
-        
-        /* début surcharge */
-        this.guestView.$el = this.$el.find('.guestShareView');
-        this.guestView.render();
-        /* fin surcharge */
-
-        this.$el.find('.hasTooltip').tooltip();
-
-        return this;
     }
+    
+    /*var old_ShareDialogShareeListView_template = OC.Share.ShareDialogShareeListView.prototype.template;
+    if (old_ShareDialogShareeListView_template) {
+        OC.Share.ShareDialogShareeListView.prototype.template = function(data) {
+            if (!this._template) {
+                this._template = Handlebars.compile(TEMPLATE);
+            }
+            return this._template(data);
+        }
+    }*/
 
     
 

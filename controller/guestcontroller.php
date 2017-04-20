@@ -24,12 +24,13 @@ namespace OCA\User_Share_Guest\Controller;
 
 use \OCA\User_Share_Guest\Db\Guest;
 use \OCA\User_Share_Guest\Db\GuestMapper;
-use \OCP\AppFramework\APIController;
+use \OCP\AppFramework\ApiController;
 use \OCP\AppFramework\Http\JSONResponse;
 use \OCP\IL10N;
 use \OCP\IRequest;
+use OC\Files\Cache\Cache;
 
-class GuestController extends APIController
+class GuestController extends ApiController
 {
 
     protected $appName;
@@ -38,21 +39,24 @@ class GuestController extends APIController
     protected $userId;
     protected $mailService;
     protected $config;
+    protected $shareManager;
+    protected $federatedShareProvider;
 
     const PERMISSION_GUEST = 1;
     const SHARE_TYPE_GUEST = 0;
 
     /**
      * Initialization
-     * @param string      $appName
-     * @param IRequest    $request
-     * @param IL10N       $l
-     * @param GuestMapper $guestMapper
-     * @param string      $userId
-     * @param object      $userManager
-     * @param object      $mailService
+     * @param string                 $appName
+     * @param IRequest               $request
+     * @param IL10N                  $l
+     * @param GuestMapper            $guestMapper
+     * @param string                 $userId
+     * @param object                 $userManager
+     * @param object                 $mailService
+     * @param \OCP\Share\IManager    $shareManager
      */
-    public function __construct($appName, IRequest $request, IL10N $l, GuestMapper $guestMapper, $userId, $userManager, $mailService, $config)
+    public function __construct($appName, IRequest $request, IL10N $l, GuestMapper $guestMapper, $userId, $userManager, $mailService, $config, $shareManager)
     {
         parent::__construct($appName, $request, 'GET, POST');
         $this->appName = $appName;
@@ -62,6 +66,7 @@ class GuestController extends APIController
         $this->userManager = $userManager;
         $this->mailService = $mailService;
         $this->config = $config;
+        $this->shareManager = $shareManager;
     }
 
     /**
@@ -72,19 +77,22 @@ class GuestController extends APIController
      * @param  string $uid
      * @param  string $itemType
      * @param  string $itemSource
-     * @param  string $itemSourceName
      * @throws \Exception
      */
-    public function create($uid, $itemType, $itemSource, $itemSourceName)
+    public function create($uid, $itemType, $itemSource)
     {
         \OCP\Util::writeLog($this->appName, $this->l->t('initialization creation guest') . $uid, 1);
         $appConfig = \OC::$server->getAppConfig();
         $domains_serialized = $appConfig->getValue('user_share_guest', 'user_share_guest_domains', '');
-        $allowed_domains = array_values(unserialize($domains_serialized));
-        $domain = substr($uid, strpos($uid, '@') + 1);
-        $dns = dns_get_record($domain);
+        $domain = array();
+        $dns = false;
+        if ($domains_serialized !== '') {
+            $allowed_domains = array_values(unserialize($domains_serialized));
+            $domain = substr($uid, strpos($uid, '@') + 1);
+            $dns = dns_get_record($domain);
+        }
 
-        if (!filter_var($uid, FILTER_VALIDATE_EMAIL) || (empty($dns) && !in_array($domain, $allowed_domains))) {
+        if (!filter_var($uid, FILTER_VALIDATE_EMAIL) || ($dns && !in_array($domain, $allowed_domains))) {
             $response = new JSONResponse();
             return array(
                 'status' => 'error',
@@ -98,7 +106,6 @@ class GuestController extends APIController
             'uid_sharer' => $this->userId,
             'item_type' => $itemType,
             'item_source' => $itemSource,
-            'item_source_name' => $itemSourceName,
             'valid' => true
         );
 
@@ -119,7 +126,7 @@ class GuestController extends APIController
                     $token = $this->generateToken($uid);
                     $guest = $this->guestMapper->createGuest($params['uid_guest'], $token);
                     $this->initGuestDir($params['uid_guest']);
-                    \OC_Preferences::setValue($params['uid_guest'], 'files', 'quota', '0 GB');
+                    $this->config->setUserValue($params['uid_guest'], 'files', 'quota', '0 GB');
                     \OCP\Util::writeLog($this->appName, $this->l->t('Guest and user accounts created : ') . $params['uid_guest'], 1);
                     $user = $this->userManager->createUser($params['uid_guest'], uniqid());
                 } else {
@@ -133,7 +140,7 @@ class GuestController extends APIController
                 }
             } else if (empty($user)) {
                 $this->initGuestDir($params['uid_guest']);
-                \OC_Preferences::setValue($params['uid_guest'], 'files', 'quota', '0 GB');
+                $this->config->setUserValue($params['uid_guest'], 'files', 'quota', '0 GB');
                 \OCP\Util::writeLog($this->appName, $this->l->t('Guest accounts created : ') . $params['uid_guest'], 1);
                 $user = $this->userManager->createUser($params['uid_guest'], uniqid());
             }
@@ -157,9 +164,7 @@ class GuestController extends APIController
             }
 
             $this->config->setUserValue($params['uid_guest'], 'settings', 'email', $params['uid_guest']);
-            $this->config->setUserValue(
-                $params['uid_guest'], 'owncloud', 'lostpassword', hash('sha256', $token)
-            );
+            $this->config->setUserValue($params['uid_guest'], 'owncloud', 'lostpassword', time() . ':' . $token); // on récupère le comportement et la génération du token de lostpassword
             \OCP\Util::writeLog($this->appName, $this->l->t('Send mail creation guest'), 1);
             $this->mailService->sendMailGuestCreate($params['uid_guest'], $token);
 
@@ -175,16 +180,12 @@ class GuestController extends APIController
             $is_guest = true;
         }
         try {
+            // Share creation
             \OCP\Util::writeLog($this->appName, $this->l->t('Set share with guest'), 1);
-            \OCP\Share::shareItem(
-                $itemType,
-                $itemSource,
-                0,
-                $uid,
-                self::PERMISSION_GUEST,
-                $itemSourceName,
-                null
-            );
+            $owner = \OC_User::getUser();
+            $filePathComplete = \OC\Files\Filesystem::getPath($itemSource);
+            $fileTarget = substr($filePathComplete, strrpos($filePathComplete, '/') +1);
+            $this->guestMapper->saveGuestShare(0, $itemType, $itemSource, $fileTarget, $uid, $owner, $owner, self::PERMISSION_GUEST);
         } catch (\Exception $e) {
             \OCP\Util::writeLog($this->appName, $this->l->t('Error when creating a guest account : ') . $e->getMessage(), 1);
             $response = new JSONResponse();
@@ -352,15 +353,6 @@ class GuestController extends APIController
     }
 
     /**
-     * Delete all guest informations
-     * @param  string $uid
-     */
-    public function deleteGuest($uid)
-    {
-        $this->guestMapper->cleanGuest($uid);
-    }
-
-    /**
      * Allows to check whether to create a guest or not
      *
      * @NoAdminRequired
@@ -370,7 +362,6 @@ class GuestController extends APIController
      *
      */
     public function isGuestCreation($uid) {
-
         try {
             $exist = $this->accountExist($uid);
         } catch (\Exception $e) {
@@ -477,21 +468,27 @@ class GuestController extends APIController
     {
         \OCP\Util::writeLog($this->appName, $this->l->t('Initialization inactivity checking'), 1);
         $guests  = $this->guestMapper->getGuests();
+        $appconfig = \OC::$server->getAppConfig();
         if (empty($guests)) {
             return false;
         }
         try {
             foreach ($guests as $guest) {
+                
                 if($guest->getDateExpiration() !== '9999-12-31 00:00:00') {
                     continue;
                 }
                 $user = $this->userManager->get($guest->getUid());
-                if ($guest->getIsActive()) {
+
+                if ($guest->getIsActive() && $user) {
                     $interval = time() - $user->getLastLogin();
                 } else {
                     $interval = time() - strtotime($guest->getDateCreation());
                 }
-                if ($interval / 86400 >= 30) { // inactive for a month
+
+                $limit_days = $appconfig->getValue('user_share_guest', 'user_share_guest_days', '30'); // inactive for a month (default)
+                
+                if ($interval / (60*60*24) >= $limit_days) { 
                     $date = mktime(00, 00, 00, date('m') + 3, date('d'), date('Y'));
                     $this->guestMapper->updateGuest($guest->getUid(), array('date_expiration' => date('Y-m-d H:i:s', $date)));
                     $this->mailService->sendMailGuestInactive($guest->getUid(), date('d/m/Y', $date));
@@ -501,6 +498,7 @@ class GuestController extends APIController
             echo $e->getMessage();
             return false;
         }
+        
         \OCP\Util::writeLog($this->appName, $this->l->t('Guest accounts verification completed.'), 1);
         return true;
     }
@@ -510,36 +508,42 @@ class GuestController extends APIController
      */
     public function generateStatistics()
     {
-        $data = $this->guestMapper->getGuestsSharer();
+
+        $data = $this->guestMapper->getGuests();
+
         if (empty($data)) {
             \OCP\Util::writeLog($this->appName, $this->l->t('No guest account, statistics generation aborted.'), 1);
             return false;
         }
         $final = array();
-        $preferences = new \OC\Preferences(\OC_DB::getConnection());
+        
+        foreach ($data as $guest) {
+            $uid_guest = $guest->getUid();
+            $shares = \OCP\Share::getItemsSharedWithUser('file', $uid_guest);
 
-        foreach ($data as $share) {
-            $uid_sharer = $share['uid_sharer'];
-            $mail = $preferences->getValue($uid_sharer, 'settings', 'email');
-            if (empty($mail)) {
-                \OCP\Util::writeLog($this->appName, $this->l->t(sprintf('Statistics generation : %s haven\'t email adress.', $uid_sharer)), 3);
-                continue;
-            }
-            $item = \OC\Share\Share::getItems($share['item_type'], $share['item_source'], null, $share['uid_guest'], $share['uid_sharer'], -1, null, 1);
-            $user = $this->userManager->get($uid_sharer);
-            if ($user->getLastLogin()) {
-                $activity = date('d/m/Y', $user->getLastLogin());
-            } else {
-                $activity = date('d/m/Y', $guest->getDateCreation());
-            }
-            $final[$mail][$share['uid_guest']]['files'][] = array(
-                'item_type' => $item['item_type'],
-                'item_source' => str_replace('/', '', $item['path'])
-            );
-            $final[$mail][$share['uid_guest']]['activity'] = $activity;
+            foreach ($shares as $s) {
+                $mail_sharer = $this->config->getUserValue($s['uid_owner'], 'settings', 'email');
+                if (empty($mail_sharer)) {
+                    \OCP\Util::writeLog($this->appName, $this->l->t(sprintf('Statistics generation : %s haven\'t email adress.', $uid_sharer)), 3);
+                    continue;
+                }
+                //$item = \OC\Share\Share::getItems($share['item_type'], $share['item_source'], null, $share['uid_guest'], $share['uid_sharer'], -1, null, 1);
+                $user = $this->userManager->get($uid_guest);
+
+                if ($user->getLastLogin()) {
+                    $activity = date('d/m/Y', $user->getLastLogin());
+                } else {
+                    $activity = date('d/m/Y', strtotime($guest->getDateCreation()));
+                }
+                $final[$mail_sharer][$uid_guest]['files'][] = array(
+                    'item_type' => $s['item_type'],
+                    'item_source' => $s['file_target']
+                );
+                $final[$mail_sharer][$uid_guest]['activity'] = $activity;
+            }           
         }
-        foreach ($final as $mail => $data) {
-            $this->mailService->sendMailGuestStatistics($mail, $data);
+        foreach ($final as $mail_sharer => $data) {
+            $this->mailService->sendMailGuestStatistics($mail_sharer, $data);
         }
         \OCP\Util::writeLog($this->appName, $this->l->t('Guest accounts statistics generated.'), 1);
     }
@@ -566,7 +570,7 @@ class GuestController extends APIController
         if ($error === '') {
             \OC_User::setPassword($uid, $password);
             $this->guestMapper->updateGuest($uid, array('accepted' => 1, 'is_active' => 1));
-            \OCP\Util::writeLog($this->appName, $this->l->t('Guest\'s password setted'), 1);
+            \OCP\Util::writeLog($this->appName, $this->l->t('Guest\'s password setted', 1));
             \OC_User::login($uid, $password);
             \OC_Hook::emit('OCA\User_Share_Guest', 'post_guestsetp    margin: 0;assword', array('uid' => $uid, 'password' => $password));
             if (!GuestController::isAccountReseda($uid)) {
@@ -636,7 +640,7 @@ class GuestController extends APIController
      */
     private function generateToken($uid)
     {
-        return hash('sha256', \OC_Util::generateRandomBytes(30));
+        return hash('sha256', \OCP\Util::generateRandomBytes(30));
     }
 
     /**
@@ -647,7 +651,7 @@ class GuestController extends APIController
      */
     private function accountExist($uid)
     {
-        \OCP\Util::writeLog($this->appName, $this->l->t('verification of the existence of a user'), 1);
+        \OCP\Util::writeLog($this->appName, $this->l->t('verification user\'s existence'), 1);
         if($this->userManager->userExists($uid)) {
             return true;
         } elseif ($this::isAccountReseda($uid)) {
@@ -702,6 +706,59 @@ class GuestController extends APIController
         }
     }
 
+
+    /**
+     * launch guest's account statistics
+     *
+     * @NoAdminRequired
+     * 
+     * @throws \Exception
+     */
+    public function saveAdmin ($days, $stat_day) {
+
+        \OCP\Util::writeLog($this->appName, 'Changing app config', 1);
+        $appConfig = \OC::$server->getAppConfig();
+        $error = [];
+        $days = trim($days);
+        $stat_day = trim($stat_day);
+
+        if (isset($days) && is_numeric($days) && $days > 0) {
+            $appConfig->setValue('user_share_guest', 'user_share_guest_days', intval(trim($days)));
+            \OCP\Util::writeLog($this->appName, 'Deletion\'s delay setted', 1);
+        } else {
+            $error[] = $this->l->t('Please enter a positve integer for the inactive period');
+        }
+        $reg_stat = '/([0-9]{2})\/([0-9]{2})/';
+        if (isset($stat_day) && preg_match($reg_stat, $stat_day)) {
+            $val_stats = explode('/', trim($stat_day));
+            $d = intval($val_stats[0]);
+            $m = intval($val_stats[1]);
+            $y = date('Y');
+            if (checkdate($m, $d, $y)) {
+                $appConfig->setValue('user_share_guest', 'user_share_guest_stats', $stat_day);
+                \OCP\Util::writeLog($this->appName, 'Statistics\'s date setted', 1);
+            } else {
+                $error[]= $this->l->t('Please enter a correct date');
+            }
+        } else {
+            $error[] = $this->l->t('Please enter a correct date');
+        }
+
+        $response = new JSONResponse();
+        if (empty($error)) {
+            \OCP\Util::writeLog($this->appName, 'App config setted', 1);
+            return array(
+                'status' => 'succes',
+            );
+        } else {
+            return array(
+                'status' => 'error',
+                'msg' => implode(" - " , $error),
+            );
+        }
+    }
+
+
     /**
      * launch guest's account statistics
      *
@@ -711,6 +768,8 @@ class GuestController extends APIController
      */
     public function launchStat () {
         $this->generateStatistics();
+        $appConfig = \OC::$server->getAppConfig();
+        $appConfig->setValue('user_share_guest', 'user_share_guest_last_stat', time());
     }
 
     /**
@@ -720,7 +779,8 @@ class GuestController extends APIController
      */
     public function launchVerif () {
         $this->verifyInactive();
-
+        $appConfig = \OC::$server->getAppConfig();
+        $appConfig->setValue('user_share_guest', 'user_share_guest_last_verif', time());
     }
 
     /**
@@ -730,6 +790,31 @@ class GuestController extends APIController
      */
     public function launchClean () {
         $this->clean();
+        $appConfig = \OC::$server->getAppConfig();
+        $appConfig->setValue('user_share_guest', 'user_share_guest_last_clean', time());
     }
 
+    /**
+     * launch guest's account statistics
+     *
+     * @NoAdminRequired
+     * @publicPage
+     * @NoCSRFRequired
+     * 
+     * @throws \Exception
+     */
+    public function test () {
+
+        /*$this->generateStatistics();
+        echo "stat done <br />";
+        
+        $this->verifyInactive();
+        echo "inactive done <br />";
+        
+        /*$this->clean();
+        echo "clean done <br />";*/
+
+        /*echo "fin";
+        exit();*/
+    }
 }

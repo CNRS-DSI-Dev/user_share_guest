@@ -1,5 +1,5 @@
 $(document).ready(function() {
-
+    
 	// ajout d'un domaine
 	$('#usershareguest-form-domains').submit(function(e) {
 		e.preventDefault();
@@ -44,20 +44,50 @@ $(document).ready(function() {
             }
         });
 	});
-    $(document).on('click', '#usershareguest button', function(e) {
+
+    // enregistrement des données
+    
+    $('#usershareguest-form').submit(function(e) {
+        
+        e.preventDefault();
+        var days = $('#usershareguestinputday').val();
+        var stat_day = $('#usershareguestinputstat').val();
+        $.ajax({
+            type: 'POST',
+            url: OC.generateUrl('apps/user_share_guest/saveadmin'),
+            dataType: 'json',
+            data: {days: days, stat_day: stat_day},
+            async: false,
+            success: function(resp) {
+                if (resp.status == 'error') {
+                    OCdialogs.info(resp.msg, t('user_share_guest', 'Input error'), function() {}, true);                
+                } else {
+                    OCdialogs.info(t('user_share_guest', 'Data saved'), t('user_share_guest', 'Share to a guest'));      
+                }
+            }
+        });
+    });
+
+    // déclenchement manuel des crons
+    $(document).on('click', '.guest_launcher', function(e) {
         e.preventDefault();
         var link = $(this).data('link');
-        var choice = confirm(t('user_share_guest', 'Confirm action ?'));
-        if (choice == true) {
-            $.ajax({
-                type: 'GET',
-                url: link,
-                dataType: 'json',
-                async: false,
-                success: function(resp) {
-                    alert(t('user_share_guest', 'Process done'));
+        OCdialogs.confirm(
+            t('user_share_guest', 'Confirm action ?'),
+            t('user_share_guest', 'Share to a guest'),
+            function(ok) {
+                if (ok) {
+                    $.ajax({
+                        type: 'GET',
+                        url: link,
+                        dataType: 'json',
+                        async: false,
+                        success: function(resp) {
+                            OCdialogs.info(t('user_share_guest', 'Process done'), '');
+                        }
+                    });
                 }
-            });
-        }
+            },
+            true);
     });
 });

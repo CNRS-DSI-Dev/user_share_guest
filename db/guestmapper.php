@@ -125,6 +125,37 @@ class GuestMapper extends Mapper {
         $this->execute($sql, array($uid_sharer, $uid, $itemType, $itemSource));
     }
 
+    /**
+     * Save a guest share on db
+     * @param  string $shareType  
+     * @param  string $itemType   
+     * @param  string $itemSource
+     * @param  string $fileTarget 
+     * @param  string $shareWith  
+     * @param  string $uidOwner   
+     * @param  string $sharedBy   
+     * @param  string $permissions
+     * @return int
+     */
+    public function saveGuestShare($shareType, $itemType, $itemSource, $fileTarget, $shareWith, $uidOwner, $sharedBy, $permissions) {
+        $qb = $this->db->getQueryBuilder();
+        $qb->insert('share')
+        ->setValue('share_type', $qb->createNamedParameter($shareType))
+        ->setValue('item_type', $qb->createNamedParameter($itemType))
+        ->setValue('item_source', $qb->createNamedParameter($itemSource))
+        ->setValue('file_source', $qb->createNamedParameter($itemSource))
+        ->setValue('file_target', $qb->createNamedParameter($fileTarget))
+        ->setValue('share_with', $qb->createNamedParameter($shareWith))
+        ->setValue('uid_owner', $qb->createNamedParameter($uidOwner))
+        ->setValue('uid_initiator', $qb->createNamedParameter($sharedBy))
+        ->setValue('permissions', $qb->createNamedParameter($permissions));
+
+        $qb->execute();
+        $id = $qb->getLastInsertId();
+
+        return (int)$id;
+    }
+
     /**********
       UPDATE
     **********/

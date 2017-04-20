@@ -33,10 +33,15 @@ class GuestHooks {
      * @copyright 2016 CNRS DSI / GLOBALIS media systems
      *
      */
-    public function register() {
+    public function register($session) {
         $myself = $this;
         \OCP\Util::connectHook('OCP\Share', 'post_shared', $this, 'postShared');
-        \OCP\Util::connectHook('OC_User', 'post_setPassword', $this, 'postPwdSetted');
+        \OCP\Util::connectHook('\OC\User', 'postSetPassword', $this, 'postPwdSetted');
+        $session->listen('\OC\User', 'postDelete', function ($user) {
+            $this->postDeleteUser($user);
+        });
+        \OCP\Util::connectHook('\OC\User', 'preDelete', $this, 'preDeleteUser');
+        
     }
 
     public function postShared ($data) {
@@ -64,6 +69,17 @@ class GuestHooks {
             } else {
                 $this->guestMapper->deleteGuest($uid);
             }
+        }
+    }
+
+    public function postDeleteUser($user) {
+        $uid = $user->getUid();
+        \OCP\Util::writeLog($this->appName, $this->l->t('coucou je suis le post user delete - ' . $user . ' - ' . $uid), 1);
+
+        $uid = $user->getUid();
+        $guest = $this->guestMapper->getGuests($uid);
+        if ($guest) {
+            $this->guestMapper->deleteGuest($uid);
         }
     }
 }

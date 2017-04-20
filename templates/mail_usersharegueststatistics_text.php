@@ -11,8 +11,9 @@
     $l = $_['overwriteL10N'];
     $data = $_['data'];
 
-    foreach ($shares as $share_with => $datashare) {
+    foreach ($data as $share_with => $datashare) {
         echo '<br/> - ' . print_unescaped($share_with) . ' : <br/>';
+        p($l->t('(Last activity : %s )', $datashare['activity'])) . '<br/>';
         p($l->t('Here is the summary of the guest accounts that you created during the year : '));
         echo "<br/>";
         foreach ($datashare as $values) {

@@ -30,7 +30,6 @@ $TRANSLATIONS  = array(
     'Set your password' => 'Renseignez votre mot passe',
     'Confirm your password' => 'Confirmez votre mot de passe',
     'Set your password to confirm the creation of your account' => 'Renseignez votre mot de passe afin de confirmer la création de votre compte',
-    'Validate', 'Valider',
     'Passwords are different, please check your entry' => 'Les mots de passe sont différents, veuillez vérifier votre saisie',
     'Your password is not enough secure' => 'Votre mot de passe n\'est pas assez sécurisé',
     'Log out' => 'Se déconnecter',
@@ -59,8 +58,9 @@ $TRANSLATIONS  = array(
     'Statistics sending date : ' => 'Date d\'envoi des statistiques : ',
     'Specific domain allowed : ' => 'Domaine spécifique accepté  : ',
     'dd/mm' => 'jj/mm',
-    'Input error, please enter a correct date.' => 'Erreur de saisie, veuillez entrer une date correcte.',
-    'Input error, please enter a whole number.' => 'Erreur de saisie, veuillez renseigner un nombre entier.',
+    'Input error' => 'Erreur de saisie',
+    'Please enter a correct date.' => 'Veuillez entrer une date correcte.',
+    'Please enter an integer for the inactive period.' => 'Veuillez renseigner un nombre entier.',
     'The domain to be deleted does not exist.' => 'Le domaine à supprimer n\'existe pas.',
     'Domain already registered.' => 'Le domaine est déjà enregistré.',
 
@@ -69,4 +69,5 @@ $TRANSLATIONS  = array(
     'Launch account cleaning' => 'Lancer le nettoyage des comptes invités',
     'Confirm action ?' => 'Confirmer l\'action ?',
     'Process done' => 'Processus terminé',
+    'Last launch : ' => 'Dernière exécution : '
 );

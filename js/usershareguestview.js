@@ -25,12 +25,7 @@
         '<span class="icon-loading-small hidden" id="guestLoad"></span>' +
         '<input type="submit" name="guestSubmit" id="guestSubmit" value="' + t('user_share_guest', 'Guest submit') + '"/>' +
         '</form>' +
-        '<ul id="guestList">' +
-        '</ul>' +
         '</div>';
-
-    var SHARE_TEMPLATE =
-        'Partage';
 
     /**
      * @member of OCA.UserFilesRestore
@@ -70,8 +65,8 @@
         },
 
         createShareGuest: function(uid) {
-
-            fileInfo = this.model.attributes;
+            var self = this;
+            var fileInfo = this.model.attributes;
             $.ajax({
                 type: 'POST',
                 url: OC.generateUrl('apps/user_share_guest/create'),
@@ -86,7 +81,7 @@
                         }, true);
                     }
                     var user = resp.data.user;
-                    OC.Share.addShareWith(0, user.uid, user.uid, false, 31, false, false);
+                    self.model.fetch();
                     $('#guestInput').val('');
                 }
             });
@@ -157,8 +152,10 @@
 
         render: function() {
             var template = this.template('base', TEMPLATE);
-
-            console.log('render partie guest');
+            var resharingAllowed = this.model.sharePermissionPossible();
+            if(!resharingAllowed) {
+                return this;
+            }
             this.$el.html(template());
             this.delegateEvents();
             return this;

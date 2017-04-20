@@ -59,8 +59,10 @@ OC.L10N.register(
     'Statistics sending date : ': 'Date d\'envoi des statistiques : ',
     'Specific domain allowed : ': 'Domaine spécifique accepté  : ',
     'dd/mm': 'jj/mm',
-    'Input error, please enter a correct date.': 'Erreur de saisie, veuillez entrer une date correcte.',
-    'Input error, please enter a whole number.': 'Erreur de saisie, veuillez renseigner un nombre entier.',
+    'Input error': 'Erreur de saisie',
+    'Please enter a correct date': 'Veuillez entrer une date correcte',
+    'Please enter a positive integer for the inactive period': 'Veuillez renseigner un nombre entier positif',
+    'Data saved': 'Données enregistrées',
     'The domain to be deleted does not exist.': 'Le domaine à supprimer n\'existe pas.',
     'Domain already registered.': 'Le domaine est déjà enregistré.',
 
@@ -69,4 +71,5 @@ OC.L10N.register(
     'Launch account cleaning': 'Lancer le nettoyage des comptes invités',
     'Confirm action ?': 'Confirmer l\'action ?',
     'Process done': 'Processus terminé',
+    'Last launch : ': 'Dernière exécution : '
 });
