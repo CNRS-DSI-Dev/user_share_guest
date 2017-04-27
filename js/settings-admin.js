@@ -72,28 +72,27 @@ $(document).ready(function() {
     $(document).on('click', '.guest_launcher', function(e) {
         e.preventDefault();
         var link = $(this).data('link');
-        $.ajax({
-            type: 'GET',
-            url: link,
-            dataType: 'json',
-            async: true,
-            data:{},
-            success: function(resp) {
-                if (resp.msg) {
-                    OCdialogs.info(t('user_share_guest', resp.msg), '');
-                } else {
-                    OCdialogs.info(t('user_share_guest', 'Process done'), '');
-                }
-            }
-        });
-        /*OCdialogs.confirm(
+        OCdialogs.confirm(
             t('user_share_guest', 'Confirm action ?'),
             t('user_share_guest', 'Share to a guest'),
             function(ok) {
                 if (ok) {
-                    
-                }
-            },
-            true);*/
+                    $.ajax({
+                        type: 'GET',
+                        url: link,
+                        dataType: 'json',
+                        async: true,
+                        data:{},
+                        success: function(resp) {
+                            if (resp.msg) {
+                                OCdialogs.info(t('user_share_guest', resp.msg), '');
+                            } else {
+                                OCdialogs.info(t('user_share_guest', 'Process done'), '');
+                            }
+                        }
+                    });
+            }
+        },
+        true);
     });
 });
