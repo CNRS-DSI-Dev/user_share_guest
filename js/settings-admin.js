@@ -51,12 +51,12 @@ $(document).ready(function() {
         
         e.preventDefault();
         var days = $('#usershareguestinputday').val();
-        var stat_day = $('#usershareguestinputstat').val();
+        
         $.ajax({
             type: 'POST',
             url: OC.generateUrl('apps/user_share_guest/saveadmin'),
             dataType: 'json',
-            data: {days: days, stat_day: stat_day},
+            data: {days: days},
             async: false,
             success: function(resp) {
                 if (resp.status == 'error') {
@@ -72,22 +72,28 @@ $(document).ready(function() {
     $(document).on('click', '.guest_launcher', function(e) {
         e.preventDefault();
         var link = $(this).data('link');
-        OCdialogs.confirm(
+        $.ajax({
+            type: 'GET',
+            url: link,
+            dataType: 'json',
+            async: true,
+            data:{},
+            success: function(resp) {
+                if (resp.msg) {
+                    OCdialogs.info(t('user_share_guest', resp.msg), '');
+                } else {
+                    OCdialogs.info(t('user_share_guest', 'Process done'), '');
+                }
+            }
+        });
+        /*OCdialogs.confirm(
             t('user_share_guest', 'Confirm action ?'),
             t('user_share_guest', 'Share to a guest'),
             function(ok) {
                 if (ok) {
-                    $.ajax({
-                        type: 'GET',
-                        url: link,
-                        dataType: 'json',
-                        async: false,
-                        success: function(resp) {
-                            OCdialogs.info(t('user_share_guest', 'Process done'), '');
-                        }
-                    });
+                    
                 }
             },
-            true);
+            true);*/
     });
 });

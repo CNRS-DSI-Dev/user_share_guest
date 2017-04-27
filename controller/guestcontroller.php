@@ -420,16 +420,19 @@ class GuestController extends ApiController
 
     /**
      * Function removing guest accounts expired
-     *
-     * @return boolean
      */
     public function clean()
     {
         \OCP\Util::writeLog($this->appName, $this->l->t('Initialization cleaning guest'), 1);
         $this->userManager->removeListener('\OC\User', 'postDelete');
         $guests  = $this->guestMapper->getGuestsExpiration();
-        if (empty($guests)) {
-            return false;
+
+        $count_delete = 0;
+        if (empty($guests)) {     
+            return array(
+                'status' => 'success',
+                'msg' => $this->l->t('No guest account to delete'),
+            );
         }
         try {
             foreach ($guests as $guest) {
@@ -446,24 +449,34 @@ class GuestController extends ApiController
                     \OCP\Util::writeLog($this->appName, $this->l->t('Guest account deleted : ') . $guest->getUid(), 1);
                     $this->mailService->sendMailGuestDelete($uid);
                     \OC_Hook::emit('OCA\User_Share_Guest', 'post_guestdelete', array('guest' => $guest));
+                    ++$count_delete;
                 } else {
                     $date = mktime(00, 00, 00, 12, 31, 9999);
                     $this->guestMapper->updateGuest($uid, array('date_expiration' => date('Y-m-d H:i:s', $date)));
                 }
             }
         } catch (Exception $e) {
-            echo $e->getMessage();
-            return false;
+            return array(
+                'status' => 'error',
+                'msg' => $e->getMessage(),
+            );
         }
+
         \OCP\Util::writeLog($this->appName, $this->l->t('Inactives guest accounts cleaning completed.'), 1);
-        return true;
+
+        return array(
+            'status' => 'success',
+            'msg' => $this->l->t('Process done : %s guest accounts deleted', $count_delete),
+        );
     }
+
+
 
     /**
      * Function checking the activity of the guest accounts.
      * In the case of long periods of inactivity, an expiration date is applied to the account
      *
-     * @return boolean
+     * @return array  $data
      */
     public function verifyInactive()
     {
@@ -495,12 +508,18 @@ class GuestController extends ApiController
                 }
             }
         } catch (Exception $e) {
-            echo $e->getMessage();
-            return false;
+            $response = new JSONResponse();
+            return array(
+                'status' => 'error',
+                'msg' => $e->getMessage(),
+            );
         }
         
         \OCP\Util::writeLog($this->appName, $this->l->t('Guest accounts verification completed.'), 1);
-        return true;
+        return array(
+            'status' => 'success',
+            'msg' => $this->l->t('Process done'),
+        );
     }
 
     /**
@@ -545,6 +564,10 @@ class GuestController extends ApiController
             $this->mailService->sendMailGuestStatistics($mail_sharer, $data);
         }
         \OCP\Util::writeLog($this->appName, $this->l->t('Guest accounts statistics generated.'), 1);
+        return array(
+            'status' => 'success',
+            'msg' => $this->l->t('Process done'),
+        );
     }
 
     /**
@@ -706,40 +729,22 @@ class GuestController extends ApiController
 
 
     /**
-     * launch guest's account statistics
-     *
-     * @NoAdminRequired
+     * Save data set in administration
      * 
      * @throws \Exception
      */
-    public function saveAdmin($days, $stat_day) {
+    public function saveAdmin($days) {
 
         \OCP\Util::writeLog($this->appName, 'Changing app config', 1);
         $appConfig = \OC::$server->getAppConfig();
         $error = [];
         $days = trim($days);
-        $stat_day = trim($stat_day);
 
         if (isset($days) && is_numeric($days) && $days > 0) {
             $appConfig->setValue('user_share_guest', 'user_share_guest_days', intval(trim($days)));
             \OCP\Util::writeLog($this->appName, 'Deletion\'s delay set', 1);
         } else {
             $error[] = $this->l->t('Please enter a positve integer for the inactive period');
-        }
-        $reg_stat = '/([0-9]{2})\/([0-9]{2})/';
-        if (isset($stat_day) && preg_match($reg_stat, $stat_day)) {
-            $val_stats = explode('/', trim($stat_day));
-            $d = intval($val_stats[0]);
-            $m = intval($val_stats[1]);
-            $y = date('Y');
-            if (checkdate($m, $d, $y)) {
-                $appConfig->setValue('user_share_guest', 'user_share_guest_stats', $stat_day);
-                \OCP\Util::writeLog($this->appName, 'Statistics\'s date set', 1);
-            } else {
-                $error[]= $this->l->t('Please enter a correct date');
-            }
-        } else {
-            $error[] = $this->l->t('Please enter a correct date');
         }
 
         $response = new JSONResponse();
@@ -765,10 +770,11 @@ class GuestController extends ApiController
      * @throws \Exception
      */
     public function launchStat () {
-        $this->generateStatistics();
         $appConfig = \OC::$server->getAppConfig();
         $appConfig->setValue('user_share_guest', 'user_share_guest_last_stat', time());
-    }
+        $response = new JSONResponse();       
+        return $this->generateStatistics();
+    }  
 
     /**
      * launch guest's account verification and cleaning
@@ -776,9 +782,11 @@ class GuestController extends ApiController
      * @throws \Exception
      */
     public function launchVerif () {
-        $this->verifyInactive();
         $appConfig = \OC::$server->getAppConfig();
         $appConfig->setValue('user_share_guest', 'user_share_guest_last_verif', time());
+        $response = new JSONResponse();       
+        return $this->verifyInactive();
+        
     }
 
     /**
@@ -787,8 +795,10 @@ class GuestController extends ApiController
      * @throws \Exception
      */
     public function launchClean () {
-        $this->clean();
         $appConfig = \OC::$server->getAppConfig();
         $appConfig->setValue('user_share_guest', 'user_share_guest_last_clean', time());
+        $response = new JSONResponse();       
+        return $this->clean();
+        
     }
 }
