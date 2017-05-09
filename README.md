@@ -11,16 +11,18 @@ A delay (days) can be defined in the administration If you do not want that acco
 
 The time before deleting an inactive account can be defined in the administration
 
-2 CRON must be placed for :
+3 CRON can be placed for :
+- check the activity of the guests (verify) 
 - Delete inactive guest accounts (clean)
 - Send statistics (mail) to the accounts having shared files to guests
+
+These jobs can be launch on admin page
 
 ## Installation
 
 Copy / Past the application's folder to your app folder
 On Owncloud, enable the application on "setting/apps"
 
-/!\ WARNING : The applications "files" and "files_sharing" must be enabled to make "user_share_guest" work
 
 ## Config
 
@@ -48,6 +50,14 @@ post_guestsetpassword   |            V           |                            |
 pre_createguest, pre_deleteguestshare, pre_guestdelete have attributes that could prevent the current action
 
 For more information about the hooks, look in GuestController and PageController pages.
+
+/ ! \ Important / ! \
+If you use a custom theme, you maybe have modified the file usershareguestview.js (core/js).
+In that case, you must reflect the change in the file js/sahredialogview-surcharged.js.
+If you modify the template variable, add changes in js/template.js
+The comments /* SURCHARGE */ and /* FIN SURCHARGE */ show where the modifications have been done.
+If you want to add other views on the shareDialog, you must specify them in subviews in the initialize function (line 38)
+
 
 ## License and authors
 

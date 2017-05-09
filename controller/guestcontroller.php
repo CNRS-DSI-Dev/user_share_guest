@@ -129,6 +129,7 @@ class GuestController extends ApiController
                     $this->config->setUserValue($params['uid_guest'], 'files', 'quota', '0 GB');
                     \OCP\Util::writeLog($this->appName, $this->l->t('Guest and user accounts created : ') . $params['uid_guest'], 1);
                     $user = $this->userManager->createUser($params['uid_guest'], uniqid());
+                    $user->setEMailAddress($params['uid_guest']);
                 } else {
                     $response = new JSONResponse();
                     return array(
@@ -143,6 +144,7 @@ class GuestController extends ApiController
                 $this->config->setUserValue($params['uid_guest'], 'files', 'quota', '0 GB');
                 \OCP\Util::writeLog($this->appName, $this->l->t('Guest accounts created : ') . $params['uid_guest'], 1);
                 $user = $this->userManager->createUser($params['uid_guest'], uniqid());
+                $user->setEMailAddress($params['uid_guest']);
             }
         } catch (\Exception $e) {
             \OCP\Util::writeLog($this->appName, $this->l->t('Error when creating a guest account : ') . $e->getMessage(), 1);

@@ -34,22 +34,22 @@
 
             var subViews = {
                 resharerInfoView: 'ShareDialogResharerInfoView',
-                linkShareView: 'ShareDialogLinkShareView',
-                expirationView: 'ShareDialogExpirationView',
                 shareeListView: 'ShareDialogShareeListView',
-                mailView: 'ShareDialogMailView',
-                socialView: 'ShareDialogLinkSocialView',
-                guestView : 'UserShareGuestView' // surcharge a cet endroit
+                /* SURCHARGE */
+                guestView : 'UserShareGuestView' 
+                /* FIN SURCHARGE */
             };
             this.existing_class = {};
             for(var name in subViews) {
                 var className = subViews[name];
+                /* SURCHARGE */
                 if (_.isUndefined(options[name]) && OC.Share[className]) {
                     this[name] = new OC.Share[className](subViewOptions)
                     this.existing_class[name] = 1;
                 } else {
                     this[name] = options[name];
                 }
+                /* FIN SURCHARGE*/
             }
 
             _.bindAll(this,
@@ -57,20 +57,27 @@
                 '_onSelectRecipient',
                 'onShareWithFieldChanged'
             );
+
+            OC.Plugins.attach('OC.Share.ShareDialogView', this);
         }
     }
 
     var old_ShareDialogView_render = OC.Share.ShareDialogView.prototype.render;
+    
     if (old_ShareDialogView_render) {
         OC.Share.ShareDialogView.prototype.render = function() {
+            /* SURCHARGE */
             var baseTemplate = this._getTemplate('base', TEMPLATE_SHAREDIALOGVIEW_RENDER_SURCHARGE);
-
+            /* FIN SURCHARGE */
             this.$el.html(baseTemplate({
                 cid: this.cid,
                 shareLabel: t('core', 'Share'),
                 sharePlaceholder: this._renderSharePlaceholderPart(),
                 remoteShareInfo: this._renderRemoteShareInfoPart(),
-                isSharingAllowed: this.model.sharePermissionPossible()
+                isSharingAllowed: this.model.sharePermissionPossible(),
+                localSharesLabel: t('core', 'User and Groups'),
+                publicSharesLabel: t('core', 'Public Links'),
+                noSharingPlaceholder: t('core', 'Resharing is not allowed')
             }));
 
             var $shareField = this.$el.find('.shareWithField');
@@ -83,18 +90,13 @@
                     },
                     source: this.autocompleteHandler,
                     select: this._onSelectRecipient
-                }).data('ui-autocomplete')._renderItem = this.autocompleteRenderItem;
+                }).data('ui-autocomplete')._renderItem = _.bind(this.autocompleteRenderItem, this);
             }
 
-            /* début surcharge */
+            /* SURCHARGE */
             if (this.existing_class.resharerInfoView != undefined) {
                 this.resharerInfoView.$el = this.$el.find('.resharerInfoView');
                 this.resharerInfoView.render();    
-            }
-            
-            if (this.existing_class.resharerInfoView != undefined) {
-                this.linkShareView.$el = this.$el.find('.linkShareView');
-                this.linkShareView.render();
             }
 
             if (this.existing_class.expirationView != undefined) {
@@ -121,7 +123,7 @@
                 this.guestView.$el = this.$el.find('.guestShareView');
                 this.guestView.render();
             }
-            /* fin surcharge */
+            /* FIN SURCHARGE */
 
             this.$el.find('.hasTooltip').tooltip();
 

@@ -50,13 +50,22 @@
 
         // initialize the view
         initialize: function(options) {
-            view = this;
+            if(!_.isUndefined(options.configModel)) {
+                this.configModel = options.configModel;
+            } else {
+                throw 'missing OC.Share.ShareConfigModel';
+            }
+
+            var view = this;
+            this.model.on('change:shares', function() {
+                view.render();
+            });
+
+            // ajout des événements
             _.bindAll(
                 this,
                 '_onChangeShareGuestVisibility'
-            );
-
-            // ajout des événements
+            );            
         },
 
         // gives the tab's label

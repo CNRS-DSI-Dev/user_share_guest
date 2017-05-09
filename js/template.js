@@ -1,20 +1,29 @@
 var TEMPLATE_SHAREDIALOGVIEW_RENDER_SURCHARGE =
-    '<div class="resharerInfoView subView"></div>' +
-    '{{#if isSharingAllowed}}' +
-    '<label for="shareWith-{{cid}}" class="hidden-visually">{{shareLabel}}</label>' +
-    '<div class="oneline">' +
-    '    <input id="shareWith-{{cid}}" class="shareWithField" type="text" placeholder="{{sharePlaceholder}}" />' +
-    '    <span class="shareWithLoading icon-loading-small hidden"></span>'+
-    '{{{remoteShareInfo}}}' +
-    '</div>' +
-    '{{/if}}' +
-    '<div class="shareeListView subView"></div>' +
-    '<div class="linkShareView subView"></div>' +
-    '<div class="expirationView subView"></div>' +
-    '<div class="mailView subView"></div>' +
-    '<div class="socialView subView"></div>' +
-    '<div class="guestShareView subView"></div>' + // partie du template modifiée
-    '<div class="loading hidden" style="height: 50px"></div>';
+   '<div class="resharerInfoView subView"></div>' +
+        '{{#if isSharingAllowed}}' +
+        '<ul class="subTabHeaders">' +
+        '    <li class="subTabHeader selected subtab-localshare">{{localSharesLabel}}</li>' +
+        '    <li class="subTabHeader subtab-publicshare">{{publicSharesLabel}}</li>' +
+        '</ul>' +
+        '<div class="tabsContainer">' +
+        // TODO: this really should be a separate view class
+        '    <div class="localShareView tab" style="padding-left:0;padding-right:0;">' +
+        '        <label for="shareWith-{{cid}}" class="hidden-visually">{{shareLabel}}</label>' +
+        '        <div class="oneline">' +
+        '            <input id="shareWith-{{cid}}" class="shareWithField" type="text" placeholder="{{sharePlaceholder}}" />' +
+        '            <span class="shareWithLoading icon-loading-small hidden"></span>'+
+        '{{{remoteShareInfo}}}' +
+        '        </div>' +
+        '        <div class="shareeListView subView"></div>' +
+        '        <div class="guestShareView subView"></div>' +
+        '    </div>' +
+        '    <div class="linkShareView subView tab hidden" style="padding-left:0;padding-right:0;"></div>' +
+        '</div>' +
+        '{{else}}' +
+        '<div class="noSharingPlaceholder">{{noSharingPlaceholder}}</div>' +
+        '{{/if}}' +
+        '<div class="loading hidden" style="height: 50px"></div>';
+    
 
 var TEMPLATE_SHAREDIALOGVIEW_LISTSHARE_SURCHARGE = '<li data-share-id="{{shareId}}" data-share-type="{{shareType}}" data-share-with="{{shareWith}}">' +
     '<a href="#" class="unshare"><span class="icon-loading-small hidden"></span><span class="icon icon-delete"></span><span class="hidden-visually">{{unshareLabel}}</span></a>' +
