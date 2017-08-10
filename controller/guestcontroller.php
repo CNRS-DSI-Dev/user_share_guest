@@ -125,11 +125,12 @@ class GuestController extends ApiController
                     // guest verification
                     $token = $this->generateToken($uid);
                     $guest = $this->guestMapper->createGuest($params['uid_guest'], $token);
-                    $this->initGuestDir($params['uid_guest']);
-                    $this->config->setUserValue($params['uid_guest'], 'files', 'quota', '0 GB');
-                    \OCP\Util::writeLog($this->appName, $this->l->t('Guest and user accounts created : ') . $params['uid_guest'], 1);
                     $user = $this->userManager->createUser($params['uid_guest'], uniqid());
                     $user->setEMailAddress($params['uid_guest']);
+                    $user->setQuota('1 B');
+                    $this->initGuestDir($params['uid_guest']);
+
+                    \OCP\Util::writeLog($this->appName, $this->l->t('Guest and user accounts created : ') . $params['uid_guest'], 1);
                 } else {
                     $response = new JSONResponse();
                     return array(
@@ -140,11 +141,11 @@ class GuestController extends ApiController
                     );
                 }
             } else if (empty($user)) {
-                $this->initGuestDir($params['uid_guest']);
-                $this->config->setUserValue($params['uid_guest'], 'files', 'quota', '0 GB');
-                \OCP\Util::writeLog($this->appName, $this->l->t('Guest accounts created : ') . $params['uid_guest'], 1);
                 $user = $this->userManager->createUser($params['uid_guest'], uniqid());
                 $user->setEMailAddress($params['uid_guest']);
+                $user->setQuota('1 B');
+                $this->initGuestDir($params['uid_guest']);
+                \OCP\Util::writeLog($this->appName, $this->l->t('Guest accounts created : ') . $params['uid_guest'], 1);
             }
         } catch (\Exception $e) {
             \OCP\Util::writeLog($this->appName, $this->l->t('Error when creating a guest account : ') . $e->getMessage(), 1);
@@ -430,7 +431,7 @@ class GuestController extends ApiController
         $guests  = $this->guestMapper->getGuestsExpiration();
 
         $count_delete = 0;
-        if (empty($guests)) {     
+        if (empty($guests)) {
             return array(
                 'status' => 'success',
                 'msg' => $this->l->t('No guest account to delete'),
@@ -490,7 +491,7 @@ class GuestController extends ApiController
         }
         try {
             foreach ($guests as $guest) {
-                
+
                 if($guest->getDateExpiration() !== '9999-12-31 00:00:00') {
                     continue;
                 }
@@ -503,7 +504,7 @@ class GuestController extends ApiController
                 }
 
                 $limit_days = $appconfig->getValue('user_share_guest', 'user_share_guest_days', '30'); // inactive for a month (default)
-                if ($interval / (60*60*24) >= $limit_days) { 
+                if ($interval / (60*60*24) >= $limit_days) {
                     $date = mktime(00, 00, 00, date('m') + 1, date('d'), date('Y')); // 1 mois de délai avant la suppression du compte
                     $this->guestMapper->updateGuest($guest->getUid(), array('date_expiration' => date('Y-m-d H:i:s', $date)));
                     $this->mailService->sendMailGuestInactive($guest->getUid(), date('d/m/Y', $date));
@@ -516,7 +517,7 @@ class GuestController extends ApiController
                 'msg' => $e->getMessage(),
             );
         }
-        
+
         \OCP\Util::writeLog($this->appName, $this->l->t('Guest accounts verification completed.'), 1);
         return array(
             'status' => 'success',
@@ -537,7 +538,7 @@ class GuestController extends ApiController
             return false;
         }
         $final = array();
-        
+
         foreach ($data as $guest) {
             $uid_guest = $guest->getUid();
             $shares = \OCP\Share::getItemsSharedWithUser('file', $uid_guest);
@@ -560,7 +561,7 @@ class GuestController extends ApiController
                     'item_source' => $s['file_target']
                 );
                 $final[$mail_sharer][$uid_guest]['activity'] = $activity;
-            }           
+            }
         }
         foreach ($final as $mail_sharer => $data) {
             $this->mailService->sendMailGuestStatistics($mail_sharer, $data);
@@ -732,7 +733,7 @@ class GuestController extends ApiController
 
     /**
      * Save data set in administration
-     * 
+     *
      * @throws \Exception
      */
     public function saveAdmin($days) {
@@ -774,9 +775,9 @@ class GuestController extends ApiController
     public function launchStat () {
         $appConfig = \OC::$server->getAppConfig();
         $appConfig->setValue('user_share_guest', 'user_share_guest_last_stat', time());
-        $response = new JSONResponse();       
+        $response = new JSONResponse();
         return $this->generateStatistics();
-    }  
+    }
 
     /**
      * launch guest's account verification and cleaning
@@ -786,9 +787,9 @@ class GuestController extends ApiController
     public function launchVerif () {
         $appConfig = \OC::$server->getAppConfig();
         $appConfig->setValue('user_share_guest', 'user_share_guest_last_verif', time());
-        $response = new JSONResponse();       
+        $response = new JSONResponse();
         return $this->verifyInactive();
-        
+
     }
 
     /**
@@ -799,8 +800,8 @@ class GuestController extends ApiController
     public function launchClean () {
         $appConfig = \OC::$server->getAppConfig();
         $appConfig->setValue('user_share_guest', 'user_share_guest_last_clean', time());
-        $response = new JSONResponse();       
+        $response = new JSONResponse();
         return $this->clean();
-        
+
     }
 }
