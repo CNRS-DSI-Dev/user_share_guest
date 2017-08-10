@@ -41,17 +41,19 @@ class GuestHooks {
             $this->postDeleteUser($user);
         });
         \OCP\Util::connectHook('\OC\User', 'preDelete', $this, 'preDeleteUser');
-        
+
     }
 
     public function postShared ($data) {
         \OCP\Util::writeLog($this->appName, $this->l->t('hook post shared actived'), 1);
         $uid = $data['shareWith'];
-        $guest = $this->guestMapper->getGuests($uid);
-        if (!empty($guest)) {
-            $this->guestMapper->saveGuestSharer($data['shareWith'], $data['uidOwner'], $data['itemType'], $data['itemSource']);
-            $this->guestMapper->updateGuestShareStatut($uid, $data['uidOwner']);
+        if ($uid) {
+            $guest = $this->guestMapper->getGuests($uid);
+            if (!empty($guest)) {
+                $this->guestMapper->updateGuestShareStatut($uid, $data['uidOwner']);
+            }
         }
+
     }
 
     public function postPwdSetted($params) {
