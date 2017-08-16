@@ -31,7 +31,7 @@ Class MailService
     }
 
     public function sendMailGuestCreate($uid, $token) {
-        
+
         // Mail part
         $theme = new \OC_Defaults;
         $subject = (string)$this->l->t('A user of MyCore wish you invite and share files with you');
@@ -59,14 +59,14 @@ Class MailService
 
         //sending
         try {
-            \OCP\Util::sendMail($toAddress, $toName, $subject, $altMail, $fromAddress, $fromName, 1, $htmlMail);
+            \OCP\Util::sendMail($toAddress, $toName, $subject, $htmlMail, $fromAddress, $fromName, 1, $altMail);
         } catch (\Exception $e) {
             \OCP\Util::writeLog($this->appName, 'Can\t send mail for guest\'s invitation : ' . $e->getMessage(), \OCP\Util::ERROR);
         }
     }
 
     public function sendMailGuestDelete($uid) {
-        
+
         // Mail part
         $theme = new \OC_Defaults;
         $subject = (string)$this->l->t('Your guest account has been deleted');
@@ -87,7 +87,7 @@ Class MailService
 
         //sending
         try {
-            \OCP\Util::sendMail($toAddress, $toName, $subject, $altMail, $fromAddress, $fromName, 1, $htmlMail);
+            \OCP\Util::sendMail($toAddress, $toName, $subject, $htmlMail, $fromAddress, $fromName, 1, $altMail);
         } catch (\Exception $e) {
             \OCP\Util::writeLog($this->appName, 'Can\'t send mail for guest\'s deletion : ' . $e->getMessage(), \OCP\Util::ERROR);
         }
@@ -117,7 +117,7 @@ Class MailService
 
         //sending
         try {
-            \OCP\Util::sendMail($toAddress, $toName, $subject, $altMail, $fromAddress, $fromName, 1, $htmlMail);
+            \OCP\Util::sendMail($toAddress, $toName, $subject, $htmlMail, $fromAddress, $fromName, 1, $altMail);
         } catch (\Exception $e) {
             \OCP\Util::writeLog($this->appName, 'Can\'t send mail for guest\'s deletion : ' . $e->getMessage(), \OCP\Util::ERROR);
         }
@@ -147,7 +147,7 @@ Class MailService
 
         //sending
         try {
-            \OCP\Util::sendMail($mail, $mail, $subject, $altMail, $fromAddress, $fromName, 1, $htmlMail);
+            \OCP\Util::sendMail($mail, $mail, $subject, $htmlMail, $fromAddress, $fromName, 1, $altMail);
         } catch (\Exception $e) {
             \OCP\Util::writeLog($this->appName, 'Can\'t send mail for guest\'s statistics : ' . $e->getMessage(), \OCP\Util::ERROR);
         }
