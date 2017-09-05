@@ -497,7 +497,7 @@ class GuestController extends ApiController
                 }
                 $user = $this->userManager->get($guest->getUid());
 
-                if ($guest->getIsActive() && $user && $user->getLastLogin()) {
+                if ($user && $user->getLastLogin()) {
                     $interval = time() - $user->getLastLogin();
                 } else {
                     $interval = time() - strtotime($guest->getDateCreation());
@@ -544,7 +544,8 @@ class GuestController extends ApiController
             $shares = \OCP\Share::getItemsSharedWithUser('file', $uid_guest);
 
             foreach ($shares as $s) {
-                $mail_sharer = $this->config->getUserValue($s['uid_owner'], 'settings', 'email');
+                $sharer = $this->userManager->get($uid_guest);
+                $mail_sharer = $sharer->getEMailAddress();
                 if (empty($mail_sharer)) {
                     \OCP\Util::writeLog($this->appName, $this->l->t(sprintf('Statistics generation : %s haven\'t email adress.', $uid_sharer)), 3);
                     continue;

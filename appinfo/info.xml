@@ -11,4 +11,7 @@
         <owncloud min-version="9.0" max-version="10.9" />
     </dependencies>
     <namespace>User_Share_Guest</namespace>
+    <background-jobs>
+        <job>\OCA\User_Share_Guest\Cron\CronGuest</job>
+    </background-jobs>
 </info>
