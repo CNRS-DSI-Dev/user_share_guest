@@ -43,33 +43,4 @@
     </field>
   </declaration>
 </table>
-<table>
-  <name>*dbprefix*guest_sharer</name>
-  <declaration>
-    <field>
-      <name>uid_sharer</name>
-      <type>text</type>
-      <notnull>true</notnull>
-      <length>64</length>
-    </field>
-    <field>
-      <name>uid_guest</name>
-      <type>text</type>
-      <notnull>true</notnull>
-      <length>64</length>
-    </field>
-    <field>
-      <name>item_type</name>
-      <type>text</type>
-      <notnull>true</notnull>
-      <length>64</length>
-    </field>
-    <field>
-      <name>item_source</name>
-      <type>text</type>
-      <notnull>true</notnull>
-      <length>255</length>
-    </field>
-  </declaration>
-</table>
 </database>
