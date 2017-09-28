@@ -59,7 +59,7 @@ Class MailService
 
         //sending
         try {
-            \OCP\Util::sendMail($toAddress, $toName, $subject, $htmlMail, $fromAddress, $fromName, 1, $altMail);
+            \OCP\Util::sendMail($toAddress, $toName, $subject, $htmlMail, $fromAddress, $fromName, 0, $altMail);
         } catch (\Exception $e) {
             \OCP\Util::writeLog($this->appName, 'Can\t send mail for guest\'s invitation : ' . $e->getMessage(), \OCP\Util::ERROR);
         }

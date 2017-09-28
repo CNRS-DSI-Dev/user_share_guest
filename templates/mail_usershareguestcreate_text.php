@@ -9,11 +9,11 @@
  */
 
     $l = $_['overwriteL10N'];
-    p($l->t('Hello,'));
-    p($l->t('The user %s wish you invite and share files with you on MyCore.', array($_['sharerUid'])));
-    p($l->t('Accept the invitation : ')) . ' ' . $_['accountUrl'];
-	p($l->t('Your login is the e-mail address by which you have been contacted'));
-    
+    print_unescaped($l->t("Hello,") . "\n\n");
+    print_unescaped($l->t("The user %s wish you invite and share files with you on MyCore.", array($_['sharerUid'])) . "\n");
+    print_unescaped($l->t('Accept the invitation : ') . $_['accountUrl'] . "\n");
+	print_unescaped($l->t("Your login is the e-mail address by which you have been contacted") . "\n");
+
 ?>
 
 
