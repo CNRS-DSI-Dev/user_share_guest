@@ -42,7 +42,7 @@ OC.L10N.register(
     // Share list
     'Share time': 'Date de partage',
     'No files have been shared with you yet.': 'Aucun fichier n\'a été partagé avec vous.',
-    'Warning, you well took knowledge of the risks regarding the sharing of file to a guest account.': 'Attention, vous avez bien pris connaissance des risques concernant le partage de fichier à un compte invité',
+    'Warning, you well took knowledge of the <strong><a href="https://mycore.core-cloud.net/index.php/s/wo5lCwfH7h2UUrm">risks regarding the sharing of file to a guest account</a></strong>.': 'Attention, vous avez bien pris connaissance des <strong><a href="https://mycore.core-cloud.net/index.php/s/wo5lCwfH7h2UUrm">risques concernant le partage de fichier à un compte invité</a></strong>.',
 
     // Log message
     'Guest accounts created : ': 'Compte invité créé : ',

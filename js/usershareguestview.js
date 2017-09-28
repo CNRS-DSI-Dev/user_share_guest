@@ -65,7 +65,7 @@
             _.bindAll(
                 this,
                 '_onChangeShareGuestVisibility'
-            );            
+            );
         },
 
         // gives the tab's label
@@ -97,7 +97,7 @@
         },
 
         // functions on event
-        
+
         _onClickShareGuest: function(event) {
             event.preventDefault();
             var self = this;
@@ -124,7 +124,7 @@
                         .then(function() {
                             var contentDiv = $('div.oc-dialog-content p');
 
-                            var msg = t('user_share_guest', 'Warning, you well took knowledge of the risks regarding the sharing of file to a guest account.');
+                            var msg = t('user_share_guest', 'Warning, you well took knowledge of <strong><a href="https://mycore.core-cloud.net/index.php/s/wo5lCwfH7h2UUrm">the risks regarding the sharing of file to a guest account</a></strong>.');
 
                             contentDiv.html(msg);
                         });
@@ -171,8 +171,8 @@
         },
 
         generatePopinGuest: function(txt, addbutton) {
-            var html = '<div id="calque-shareguest-popin"><div id="shareguest-popin">' + 
-                        '<span class="close">X</span>' + 
+            var html = '<div id="calque-shareguest-popin"><div id="shareguest-popin">' +
+                        '<span class="close">X</span>' +
                         '<p>' + txt + '</p>';
             if (addbutton) {
                 html += '<button class="validate">' + t('user_share_guest', 'Validate') + '</button> <button class="cancel">' + t('user_share_guest', 'Cancel') + '</button>'
@@ -195,6 +195,6 @@
         }
     });
 
-    OC.Share.UserShareGuestView = UserShareGuestView;        
+    OC.Share.UserShareGuestView = UserShareGuestView;
 })();
 
