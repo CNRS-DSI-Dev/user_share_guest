@@ -15,7 +15,7 @@ OC.L10N.register(
     // Mail
     'Hello,': 'Bonjour,',
     'A user of MyCore wish you invite and share files with you': 'Un utilisateur de MyCore souhaite vous inviter et partager des fichiers avec vous',
-    'The user %s wish you invite and share files with you on MyCore.': 'l\'utilisateur %s souhaite vous inviter et partager des fichiers avec vous sur MyCore.',
+    'The user %s wish you invite and share files with you on MyCore.': 'L\'utilisateur %s souhaite vous inviter et partager des fichiers avec vous sur MyCore.',
     'Accept the invitation.': 'Accepter l\'invitation.',
     'Accept the invitation : ': 'Accepter l\'invitation : ',
     'Your login is the e-mail address by which you have been contacted': 'Votre identifiant de connexion est l\'adresse mail par laquelle vous avez été contacté(e)',
