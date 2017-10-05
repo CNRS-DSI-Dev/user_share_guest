@@ -124,7 +124,7 @@
                         .then(function() {
                             var contentDiv = $('div.oc-dialog-content p');
 
-                            var msg = t('user_share_guest', 'Warning, you well took knowledge of <strong><a href="https://mycore.core-cloud.net/index.php/s/wo5lCwfH7h2UUrm">the risks regarding the sharing of file to a guest account</a></strong>.');
+                            var msg = t('user_share_guest', 'Warning, you well took knowledge of the <strong><a href="https://mycore.core-cloud.net/index.php/s/wo5lCwfH7h2UUrm">risks regarding the sharing of file to a guest account</a></strong>.');
 
                             contentDiv.html(msg);
                         });
